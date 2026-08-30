@@ -24,7 +24,7 @@ catalogue future releases build against.
 | Data provenance on every record | ✅ Shipped | 0.1 | `source` and ingestion timestamp |
 | Dated liquid U.S. universe (50 names to start) | ⬜ Planned | 0.2 | Grows toward 100–300 only once membership by date is real |
 | Licensed historical bar ingestion (Alpaca) | ⬜ Planned | 0.2 | Licensed APIs only; no scraping |
-| Parquet + DuckDB local store | ⬜ Planned | 0.2 | |
+| Parquet + DuckDB local store | ✅ Shipped | 0.2 | Exact decimals on disk; idempotent upserts; stale re-fetch cannot revert a correction |
 | Survivorship warning on non-point-in-time sources | ⬜ Planned | 0.2 | Flags yfinance-style current-membership lists |
 
 ## 2. Research integrity

@@ -8,6 +8,20 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
 ## [Unreleased]
 
 ### Added
+- `lab.store` — Parquet record store queried through DuckDB, with `BarStore` and
+  `InstrumentStore`. Prices and quantities are stored as exact decimals
+  (`decimal128(38, 12)`); a value with more precision than that raises on write
+  rather than truncating silently.
+- Writes are upserts on the record's natural key: re-writing identical data
+  touches no file at all, a corrected bar replaces the stored one, and a stale
+  re-fetch (older `ingested_at`) is refused so it cannot revert a correction.
+- Data dependencies: `pyarrow`, `duckdb`, `numpy`, `pandas`, `scikit-learn`.
+  The last three are unused until tasks 5–10 of the Release 0.2 plan; they are
+  resolved now so later tasks do not each churn the lock file.
+- 32 tests covering decimal fidelity, timestamp precision, idempotency,
+  corrections, filtering, and layout.
+
+### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across
   four phases), a status table to update as work lands, the locked decisions with
   their rationale, and per-task definitions of done.

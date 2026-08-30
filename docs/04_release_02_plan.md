@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Not started.
+**Status:** approved 2026-08-30. Task 1 done; task 2 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -34,7 +34,7 @@ Build the pipeline first. Plug the real data in at the end.
 
 | # | Task | Phase | Status | Closes |
 |---|---|---|---|---|
-| 1 | Data dependencies + `lab/store/` Parquet + DuckDB layer | A | ⬜ Not started | |
+| 1 | Data dependencies + `lab/store/` Parquet + DuckDB layer | A | ✅ Done | |
 | 2 | Deterministic synthetic bar generator | A | ⬜ Not started | |
 | 3 | Dated universe with membership by date | A | ⬜ Not started | |
 | 4 | Walk-forward splitter with purge and embargo | A | ⬜ Not started | |
@@ -95,7 +95,25 @@ the same bars twice leaves the store unchanged; provenance (`source`,
 representation explicitly and assert the round trip, or prices will silently
 become floats and reconciliation will drift later.
 
+**Resolved as built:**
+
+- Decimals are stored as `decimal128(38, 12)`, verified lossless through both
+  Parquet and DuckDB. A value with more than twelve decimal places raises on
+  write rather than truncating.
+- The store converts contracts to Arrow **directly, never through pandas**.
+  pandas has no Decimal column type, so a price routed through a DataFrame would
+  land on disk as a float64. pandas is a declared dependency for later tasks but
+  the store does not import it.
+- Directory names are plain (`bars/1day/SPY/`), not Hive-style `key=value`.
+  Hive naming made pyarrow synthesise an `interval` column from the path that
+  collided with the real one in the file. Every column lives in the file.
+- Writes are upserts on the natural key with three properties: identical data
+  touches no file at all, a genuine correction lands, and a stale re-fetch
+  (older `ingested_at`) is refused rather than reverting a correction.
+
 #### 2. Deterministic synthetic bar generator
+
+> Next up.
 
 A seeded generator producing realistic OHLCV for N symbols over a date range,
 living in `tests/` (test-only, never shipped as a data source).

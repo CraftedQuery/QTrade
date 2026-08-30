@@ -11,6 +11,16 @@ license = { text = "Proprietary" }
 dependencies = [
     "pydantic>=2.9,<3",
     "pyyaml>=6.0,<7",
+    # Storage layer. The store writes Arrow directly, never via pandas, so a
+    # Decimal price cannot be silently coerced to a float on the way to disk.
+    "pyarrow>=17,<22",
+    "duckdb>=1.1,<2",
+    # Declared now per decision D2 in docs/04_release_02_plan.md. Unused until
+    # the feature pipeline (task 5), metrics (task 10) and the ridge model
+    # (task 8); resolved in one go so later tasks do not each churn the lock.
+    "numpy>=2.0,<3",
+    "pandas>=2.2,<3",
+    "scikit-learn>=1.5,<2",
 ]
 
 [project.optional-dependencies]
