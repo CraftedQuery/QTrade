@@ -21,7 +21,7 @@ enforced in their types rather than left to review.
 
 **Done when:** `make check` passes on a clean clone.
 
-## Release 0.2 — Data and baseline ⬜
+## Release 0.2 — Data and baseline 🟡
 
 *Weeks 3–4.*
 
@@ -38,6 +38,12 @@ Task-by-task breakdown and locked decisions:
 
 **Done when:** the baseline runs end to end on a clean machine and the
 look-ahead tests pass against real features.
+
+**Progress:** 8 of 13 tasks done. Storage, synthetic data, universe, splitter,
+features, labels, strategies and the ridge model are built. Costs, metrics,
+holdout isolation, the experiment runner and the Alpaca adapter remain — so no
+result has been produced yet. Task detail:
+[`../04_release_02_plan.md`](../04_release_02_plan.md).
 
 **Explicitly not in 0.2:** news, LLM calls, any broker connection, dashboard.
 

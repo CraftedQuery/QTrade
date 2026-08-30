@@ -357,10 +357,57 @@ contain planted leaks that real data cannot.
   and do not search until the number flips.
 - If look-ahead, data rights, or live-trading temptation appears: stop and ask.
 
+## Where we left off
+
+*Last updated after task 8, 2026-08-30.*
+
+**Phases A and B are complete.** Tasks 1–8 are merged to the working branch:
+storage, synthetic data, universe, splitter, features, labels, strategies, model.
+778 tests pass; `make check` is clean.
+
+What exists end to end today: bars can be stored and read back with exact
+decimals; a dated universe answers point-in-time membership; walk-forward folds
+carry purge and embargo; features compute with a derived information cutoff;
+labels carry `known_at`; four baseline strategies emit proposals on monthly,
+weekly or daily schedules; and a ridge model fits per fold and emits predictions.
+
+What does **not** exist yet: any transaction cost, any performance metric, any
+holdout isolation, any single command that runs the whole thing, and any real
+market data. Nothing has been evaluated, so **there is no result of any kind** —
+no Sharpe, no rank IC, no comparator table. Do not report one until task 12 has
+run.
+
+### The next task
+
+**Task 9, the cost model.** It has no dependencies beyond what is already built.
+The three that follow are the substance of Phase C:
+
+| Next | Task | Why it matters |
+|---|---|---|
+| 9 | Cost model `conservative_v1` | Until costs exist, every number is gross and flattering |
+| 10 | Metrics | Rank IC, turnover, drawdown, net of cost, against the comparators |
+| 11 | Holdout isolation | Closes acceptance #3; training must not be able to import the evaluator |
+| 12 | Experiment runner | Closes acceptance #6; one command, registered before results |
+
+Task 13 (Alpaca) is last and is the only one needing credentials.
+
+### Open items carried forward
+
+- **Owner mandate §3 is still empty.** `configs/risk.yaml` ships provisional
+  placeholders flagged `owner_approved: false`. Nothing in 0.2 enforces limits,
+  so this is not blocking here — it stops being harmless when Release 0.3 lands.
+- **Alpaca paper credentials** are needed for task 13 only.
+- **A design question for task 10:** the metrics need a decision on whether rank
+  IC is computed per rebalance date and averaged, or pooled across all dates.
+  Per-date-then-average is standard and more honest about time variation;
+  flagging it rather than silently picking.
+
 ## Resuming a session
 
-1. Read this file's status table and the Decisions section.
+1. Read the status table, the Decisions section, and *Where we left off* above.
 2. `git fetch origin main && git checkout -B <branch> origin/main` if the last PR
    merged.
 3. `make install && make check` to confirm a clean base.
 4. Pick the lowest-numbered task that is not ✅ and whose dependencies are done.
+5. Update the status table and *Where we left off* in the same change set as the
+   code — see *Documentation duty* in `AGENTS.md`.
