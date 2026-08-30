@@ -22,10 +22,10 @@ catalogue future releases build against.
 | OHLCV bar contract with explicit information time | ✅ Shipped | 0.1 | `information_time` = bar close, never bar open |
 | Corporate-action adjustment tracking | ✅ Shipped | 0.1 | Recorded per bar; prevents mixing adjusted and raw series |
 | Data provenance on every record | ✅ Shipped | 0.1 | `source` and ingestion timestamp |
-| Dated liquid U.S. universe (50 names to start) | ⬜ Planned | 0.2 | Grows toward 100–300 only once membership by date is real |
+| Dated liquid U.S. universe (50 names to start) | ✅ Shipped | 0.2 | Point-in-time membership with a trailing liquidity screen |
 | Licensed historical bar ingestion (Alpaca) | ⬜ Planned | 0.2 | Licensed APIs only; no scraping |
 | Parquet + DuckDB local store | ✅ Shipped | 0.2 | Exact decimals on disk; idempotent upserts; stale re-fetch cannot revert a correction |
-| Survivorship warning on non-point-in-time sources | ⬜ Planned | 0.2 | Flags yfinance-style current-membership lists |
+| Survivorship warning on non-point-in-time sources | ✅ Shipped | 0.2 | `Universe.survivorship_biased` travels with the record |
 
 ## 2. Research integrity
 

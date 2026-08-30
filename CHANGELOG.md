@@ -27,6 +27,13 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   synthetic prices cannot reach a real experiment.
 - 22 tests covering determinism (including across processes), OHLC validity,
   session handling, and each edge case.
+- `lab.universe` — point-in-time universe construction. Membership comes from
+  each instrument's listing window, and the trailing liquidity screen reads only
+  bars whose `information_time` falls at or before the evaluation date, so a name
+  qualifies only once it has already traded enough. A universe whose instruments
+  lack listing dates is marked `survivorship_biased` on the record.
+- 17 tests, including one that builds the same universe from the full history and
+  from a future-truncated history and requires past membership to be identical.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

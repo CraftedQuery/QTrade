@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Tasks 1-2 done; task 3 next.
+**Status:** approved 2026-08-30. Tasks 1-3 done; task 4 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -36,7 +36,7 @@ Build the pipeline first. Plug the real data in at the end.
 |---|---|---|---|---|
 | 1 | Data dependencies + `lab/store/` Parquet + DuckDB layer | A | ✅ Done | |
 | 2 | Deterministic synthetic bar generator | A | ✅ Done | |
-| 3 | Dated universe with membership by date | A | ⬜ Not started | |
+| 3 | Dated universe with membership by date | A | ✅ Done | |
 | 4 | Walk-forward splitter with purge and embargo | A | ⬜ Not started | |
 | 5 | Feature pipeline with derived information cutoff | B | ⬜ Not started | **#2** |
 | 6 | Forward-return labels with explicit horizon | B | ⬜ Not started | |
@@ -136,8 +136,6 @@ UTC with no holiday calendar or DST — real sessions come from observed data (D
 
 #### 3. Dated universe
 
-> Next up.
-
 Build a universe from instruments plus a liquidity screen. `members_on(date)`
 answers membership as of a past date, on top of `Instrument.was_listed_on`.
 
@@ -149,7 +147,18 @@ survivorship-biased, loudly and in the record, not in a comment.
 average volume computed over the whole history selects names that were liquid
 *later*. Screen on trailing data only, as of each date.
 
+**Resolved as built:** the screen reads only bars whose `information_time` falls
+at or before the end of the evaluation date, so a name enters the universe only
+once it has *already* traded enough to qualify. The guard is proved, not
+asserted: one test builds the same universe twice — once from the full history,
+once with every future bar removed — and requires membership on each past date to
+be identical. A screen that peeked would make those diverge. `survivorship_biased`
+is a field on the `Universe` record rather than a log line, so the warning travels
+with any result built on it.
+
 #### 4. Walk-forward splitter with purge and embargo
+
+> Next up.
 
 A pure function: date range, label horizon, purge, embargo → ordered
 `(train, test)` folds. This is the integrity centrepiece of the release.
