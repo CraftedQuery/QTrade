@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "FillSource": {
+      "description": "Origin of a fill record.\n\nBroker paper fills and conservative internal shadow fills are stored side\nby side and never merged or overwritten, so the two can always be compared.",
+      "enum": [
+        "broker_paper",
+        "internal_shadow"
+      ],
+      "title": "FillSource",
+      "type": "string"
+    },
+    "Side": {
+      "description": "Order side.\n\n``SELL`` may only reduce or close an existing long position; it can never\nopen a short. That invariant is enforced by the position-aware risk engine,\nnot by this enum.",
+      "enum": [
+        "buy",
+        "sell"
+      ],
+      "title": "Side",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/fill.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An execution against an order.\n\nFills are append-only. A ``broker_paper`` fill is the record of what the\npaper broker actually did; an ``internal_shadow`` fill is the lab's own,\ndeliberately more pessimistic estimate for the same order. Both are kept.\nShadow fills never overwrite broker fills, and the two are never summed.",
+  "properties": {
+    "client_order_id": {
+      "description": "Idempotency key of that order.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Client Order Id",
+      "type": "string"
+    },
+    "fee": {
+      "default": "0",
+      "description": "Commissions and fees charged.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Fee",
+      "type": "string"
+    },
+    "fill_id": {
+      "description": "Unique fill id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Fill Id",
+      "type": "string"
+    },
+    "filled_at": {
+      "description": "When the execution occurred.",
+      "format": "date-time",
+      "title": "Filled At",
+      "type": "string"
+    },
+    "order_id": {
+      "description": "Order this fill belongs to.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Order Id",
+      "type": "string"
+    },
+    "price": {
+      "description": "Execution price per share.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Price",
+      "type": "string"
+    },
+    "quantity": {
+      "description": "Shares filled. Strictly positive.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Quantity",
+      "type": "string"
+    },
+    "recorded_at": {
+      "description": "When the lab stored the fill.",
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sequence": {
+      "description": "Monotonic index of this fill within its order.",
+      "minimum": 0,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "side": {
+      "$ref": "#/$defs/Side",
+      "description": "Buy or sell."
+    },
+    "source": {
+      "$ref": "#/$defs/FillSource",
+      "description": "Broker paper fill or internal shadow fill."
+    },
+    "symbol": {
+      "description": "Instrument traded.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Symbol",
+      "type": "string"
+    }
+  },
+  "required": [
+    "fill_id",
+    "order_id",
+    "client_order_id",
+    "source",
+    "symbol",
+    "side",
+    "quantity",
+    "price",
+    "filled_at",
+    "recorded_at",
+    "sequence"
+  ],
+  "title": "Fill",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}

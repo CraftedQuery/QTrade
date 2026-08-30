@@ -1,0 +1,40 @@
+# Deterministic risk limits.
+#
+# These are hard ceilings the risk engine enforces. They are NOT advisory and no
+# model output may change them. Edit this file (or set LAB_RISK_* variables) and
+# restart; limits never move mid-session, because every risk decision stores a
+# hash of the limits it was checked against.
+#
+# Precedence: built-in defaults  <  this file  <  LAB_RISK_* environment vars
+#
+# ⚠️  PROVISIONAL. The values below are conservative placeholders, not advice.
+#     Replace them with the owner's numbers from docs/00_owner_mandate.md §3,
+#     then set owner_approved: true.
+
+risk:
+  # Simulated starting capital, USD. Paper only — no real money is ever at risk.
+  starting_capital: 100000
+
+  # Largest share of the book any single name may take.
+  max_position_weight: 0.05
+
+  # Largest total invested weight. Below 1.0 means the book always holds cash.
+  # Above 1.0 is impossible: leverage is rejected by the Proposal contract.
+  max_gross_exposure: 0.60
+
+  # Most names held at once.
+  max_positions: 20
+
+  # Daily loss fraction that halts trading for the session. 0.02 = 2%.
+  max_daily_loss: 0.02
+
+  # Peak-to-trough drawdown fraction that stops the lab. 0.10 = 10%.
+  max_drawdown: 0.10
+
+  # Market data older than this refuses to trade.
+  max_data_staleness_seconds: 300
+
+  # Set true only once these numbers come from a completed owner mandate.
+  # While false, the limits report themselves as provisional and Release 0.3
+  # will refuse to run an unattended session.
+  owner_approved: false

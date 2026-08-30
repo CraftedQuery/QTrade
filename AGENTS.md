@@ -38,7 +38,7 @@ If those files conflict with older v1.3 roadmap docs, **these files win**.
 7. Append-only experiment, prediction, and decision records.
 8. Streamlit dashboard for research/ops. Docker Compose for local run.
 
-Definition of done for any task: tests pass, a clean command reproduces the result, and no secret leaked.
+Definition of done for any task: tests pass, a clean command reproduces the result, user documentation is current, and no secret leaked.
 
 ## Stack
 
@@ -48,6 +48,32 @@ Definition of done for any task: tests pass, a clean command reproduces the resu
 - One command should run the baseline experiment from raw inputs
 
 Prefer the smallest change that satisfies the current slice.
+
+## Documentation duty
+
+Documentation is part of a change, not a follow-up to it. If a change alters what
+the lab does, update the docs **in the same change set**. A pull request that
+ships behaviour without its documentation is incomplete.
+
+| If you changed | Update |
+|---|---|
+| A contract in `src/lab/contracts/` | Run `make schemas`, then `docs/03_data_contracts.md` |
+| What the lab can do | The status row in `docs/user/02_features.md` |
+| What ships when | `docs/user/03_roadmap.md` |
+| Install or run steps | `docs/user/04_getting_started.md` |
+| A term a newcomer would not know | `docs/user/05_glossary.md` |
+| Scope, goals, or a non-goal | `docs/user/01_mission_and_goals.md`, and this file if binding |
+| Anything user-visible | `CHANGELOG.md` |
+
+Rules:
+
+- A feature is not shipped until its status row in `docs/user/02_features.md`
+  says so. Do not mark a row shipped ahead of the code.
+- Never document a capability that does not exist yet. Planned work belongs in
+  the roadmap with a status, not in the present tense.
+- Record known gaps and negative results. Documentation that only describes what
+  works is marketing, not documentation.
+- Do not put credentials, keys, or internal hostnames in any document.
 
 ## Research integrity (agents break this if unsupervised)
 

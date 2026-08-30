@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "ExperimentStatus": {
+      "description": "Lifecycle state of a registered experiment.",
+      "enum": [
+        "registered",
+        "running",
+        "complete",
+        "abandoned"
+      ],
+      "title": "ExperimentStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/experiment.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A registered experiment.\n\nRegistration happens *before* any result is viewed, which is why\n``registered_at``, the split boundaries, and the purge/embargo settings are\nall required at construction. ``trial_count`` travels with the experiment so\nthat no performance number can be reported without its search budget, and\n``holdout_unsealed_at`` records the one moment the holdout was looked at.",
+  "properties": {
+    "code_git_sha": {
+      "description": "Commit the experiment ran from.",
+      "minLength": 7,
+      "title": "Code Git Sha",
+      "type": "string"
+    },
+    "config_hash": {
+      "description": "Hash of the resolved configuration.",
+      "minLength": 8,
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "cost_model_id": {
+      "description": "Transaction-cost model applied.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Cost Model Id",
+      "type": "string"
+    },
+    "embargo": {
+      "description": "Span after each split withheld from training.",
+      "format": "duration",
+      "title": "Embargo",
+      "type": "string"
+    },
+    "experiment_id": {
+      "description": "Unique experiment id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Experiment Id",
+      "type": "string"
+    },
+    "feature_set": {
+      "description": "Feature set used.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Feature Set",
+      "type": "string"
+    },
+    "feature_set_version": {
+      "description": "Feature-set version used.",
+      "title": "Feature Set Version",
+      "type": "string"
+    },
+    "holdout_end": {
+      "description": "Exclusive end of the sealed holdout.",
+      "format": "date-time",
+      "title": "Holdout End",
+      "type": "string"
+    },
+    "holdout_start": {
+      "description": "Inclusive start of the sealed holdout.",
+      "format": "date-time",
+      "title": "Holdout Start",
+      "type": "string"
+    },
+    "holdout_unsealed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "When holdout results were first viewed. None means still sealed.",
+      "title": "Holdout Unsealed At"
+    },
+    "hypothesis": {
+      "description": "What this experiment claims, written before results are seen.",
+      "minLength": 1,
+      "title": "Hypothesis",
+      "type": "string"
+    },
+    "name": {
+      "description": "Short human-readable name.",
+      "title": "Name",
+      "type": "string"
+    },
+    "parent_experiment_id": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Predecessor, when this is a follow-up trial.",
+      "title": "Parent Experiment Id"
+    },
+    "purge": {
+      "description": "Span dropped around split boundaries to remove overlapping labels.",
+      "format": "duration",
+      "title": "Purge",
+      "type": "string"
+    },
+    "registered_at": {
+      "description": "Registration time. Precedes any result.",
+      "format": "date-time",
+      "title": "Registered At",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ExperimentStatus",
+      "default": "registered"
+    },
+    "train_end": {
+      "description": "Exclusive end of the training window.",
+      "format": "date-time",
+      "title": "Train End",
+      "type": "string"
+    },
+    "train_start": {
+      "description": "Inclusive start of the training window.",
+      "format": "date-time",
+      "title": "Train Start",
+      "type": "string"
+    },
+    "trial_count": {
+      "description": "Configurations tried so far in this line of search, this one included.",
+      "minimum": 1,
+      "title": "Trial Count",
+      "type": "integer"
+    },
+    "universe_id": {
+      "description": "Dated universe definition used.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Universe Id",
+      "type": "string"
+    },
+    "validation_end": {
+      "description": "Exclusive end of validation.",
+      "format": "date-time",
+      "title": "Validation End",
+      "type": "string"
+    },
+    "validation_start": {
+      "description": "Inclusive start of validation.",
+      "format": "date-time",
+      "title": "Validation Start",
+      "type": "string"
+    }
+  },
+  "required": [
+    "experiment_id",
+    "name",
+    "hypothesis",
+    "registered_at",
+    "universe_id",
+    "feature_set",
+    "feature_set_version",
+    "train_start",
+    "train_end",
+    "validation_start",
+    "validation_end",
+    "holdout_start",
+    "holdout_end",
+    "purge",
+    "embargo",
+    "cost_model_id",
+    "code_git_sha",
+    "config_hash",
+    "trial_count"
+  ],
+  "title": "Experiment",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}

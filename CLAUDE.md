@@ -18,5 +18,9 @@ You are implementing a **narrow paper-trading research lab**, not a hedge-fund p
 - When reviewing code you or Grok Build wrote, hunt look-ahead, survivorship, leaked labels, non-idempotent orders, and secrets in logs.
 - If asked to “just make the Sharpe better,” refuse and require a registered experiment.
 - Do not install NVIDIA NeMo, Kubernetes flywheels, or extra model vendors to look complete.
+- Ship documentation with the code. See *Documentation duty* in `AGENTS.md`: a
+  change that alters what the lab does updates `docs/user/` and `CHANGELOG.md` in
+  the same change set. Do not mark a feature shipped ahead of its code, and do not
+  describe planned work in the present tense.
 
 `AGENTS.md` contains the binding constraints, stack, and out-of-scope list.
