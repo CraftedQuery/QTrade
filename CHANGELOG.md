@@ -54,6 +54,12 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   available history yields nothing rather than a return over a shorter span.
 - 17 tests, including one pinning that a label's entry price is the same close a
   feature computed at the same instant would have seen.
+- `lab.strategies` — the four comparators (cash, benchmark, equal weight,
+  momentum), each emitting a `Proposal` so all go through the same risk engine
+  and cost model. Rebalance schedules are monthly (default), weekly or daily,
+  derived from observed sessions rather than a calendar library.
+- 38 tests, including parametrized checks that no strategy can short or lever and
+  that none can quote a reference price it could not have known.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

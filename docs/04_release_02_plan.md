@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Tasks 1-6 done; task 7 next.
+**Status:** approved 2026-08-30. Tasks 1-7 done; task 8 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -40,7 +40,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 4 | Walk-forward splitter with purge and embargo | A | ✅ Done | |
 | 5 | Feature pipeline with derived information cutoff | B | ✅ Done | **#2** |
 | 6 | Forward-return labels with explicit horizon | B | ✅ Done | |
-| 7 | Baseline strategies + rebalance schedules | B | ⬜ Not started | |
+| 7 | Baseline strategies + rebalance schedules | B | ✅ Done | |
 | 8 | Regularized linear (ridge) model | B | ⬜ Not started | |
 | 9 | Cost model `conservative_v1` | C | ⬜ Not started | |
 | 10 | Metrics: rank IC, turnover, drawdown, net of cost | C | ⬜ Not started | |
@@ -230,8 +230,6 @@ from a shorter span.
 
 #### 7. Baseline strategies and rebalance schedules
 
-> Next up.
-
 Cash, buy-and-hold SPY, equal weight, and momentum. Each emits a `Proposal` per
 rebalance date. Rebalance frequency is configurable — monthly default, weekly,
 daily (D4).
@@ -240,7 +238,22 @@ daily (D4).
 frequency; weights are long-or-cash and never exceed 1; the schedule is derived
 from observed trading sessions (D3), not from a hardcoded calendar.
 
+**Resolved as built:** a period's rebalance is its **last observed session**, so
+the decision is made with that period's information complete and a holiday
+shifts the date automatically rather than producing a rebalance on a closed day.
+The final session is always a rebalance — dropping a trailing partial period
+would silently lose the most recent decision.
+
+Weights round *down*, so accumulated rounding leaves a little extra cash rather
+than manufacturing leverage the `Proposal` contract would reject. Momentum skips
+names whose feature is `None` rather than ranking them as zero: an absent value
+means "not enough history", and ranking it against real values would invent a
+signal. Reference prices come through `BarWindow`, so a strategy cannot quote a
+close it could not have known.
+
 #### 8. Regularized linear model
+
+> Next up.
 
 Ridge, trained per fold, emitting `Prediction` records **before** outcomes exist.
 

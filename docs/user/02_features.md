@@ -53,11 +53,11 @@ review comments.
 
 | Feature | Status | Release | Notes |
 |---|---|---|---|
-| Cash baseline | ⬜ Planned | 0.2 | |
-| Benchmark ETF baseline | ⬜ Planned | 0.2 | |
-| Equal-weight baseline | ⬜ Planned | 0.2 | The control every result is judged against |
-| Simple momentum / risk baseline | ⬜ Planned | 0.2 | |
-| Configurable rebalance frequency | ⬜ Planned | 0.2 | Monthly default, weekly, daily |
+| Cash baseline | ✅ Shipped | 0.2 | |
+| Benchmark ETF baseline | ✅ Shipped | 0.2 | |
+| Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
+| Simple momentum / risk baseline | ✅ Shipped | 0.2 | Top-N by 12-1 momentum, equally weighted |
+| Configurable rebalance frequency | ✅ Shipped | 0.2 | Monthly default, weekly, daily; derived from observed sessions |
 | Regularized linear model | ⬜ Planned | 0.2 | |
 | One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
