@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Tasks 1-7 done; task 8 next.
+**Status:** approved 2026-08-30. **Phases A and B complete (tasks 1-8).** Task 9 next; Phase C is the whole remainder except the Alpaca adapter.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -41,7 +41,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 5 | Feature pipeline with derived information cutoff | B | ✅ Done | **#2** |
 | 6 | Forward-return labels with explicit horizon | B | ✅ Done | |
 | 7 | Baseline strategies + rebalance schedules | B | ✅ Done | |
-| 8 | Regularized linear (ridge) model | B | ⬜ Not started | |
+| 8 | Regularized linear (ridge) model | B | ✅ Done | |
 | 9 | Cost model `conservative_v1` | C | ⬜ Not started | |
 | 10 | Metrics: rank IC, turnover, drawdown, net of cost | C | ⬜ Not started | |
 | 11 | Holdout evaluation isolated from training | C | ⬜ Not started | **#3** |
@@ -253,17 +253,30 @@ close it could not have known.
 
 #### 8. Regularized linear model
 
-> Next up.
-
 Ridge, trained per fold, emitting `Prediction` records **before** outcomes exist.
 
 **Done when:** training touches only its fold's training window; predictions carry
 their `DatasetSplit`; refitting on the same fold and seed reproduces the same
 predictions.
 
+**Resolved as built:** ridge is the honest baseline — reproducible, inspectable
+coefficients, and it cannot memorise the way a flexible model can. If ridge finds
+nothing, a more expressive model that appears to find something is far more
+likely to be fitting noise.
+
+`align()` joins snapshots to labels on `(symbol, as_of)` and **drops** any row
+with a missing feature rather than imputing it. A zero standing in for "not
+enough history" is a fabricated observation and is indistinguishable from a real
+zero once it reaches the model. Incomplete snapshots are likewise never scored.
+Below `min_rows` the fit returns `None`: better no model than one fitted to
+noise. One test plants a known linear relationship and requires the fit to
+recover it, so a broken fit cannot pass silently.
+
 ### Phase C — evaluation
 
 #### 9. Cost model `conservative_v1`
+
+> Next up.
 
 Spread plus commission applied to turnover. Assumptions written down, not
 implied.

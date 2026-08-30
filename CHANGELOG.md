@@ -60,6 +60,12 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   derived from observed sessions rather than a calendar library.
 - 38 tests, including parametrized checks that no strategy can short or lever and
   that none can quote a reference price it could not have known.
+- `lab.models` — ridge baseline fitted per walk-forward fold, emitting
+  `Prediction` records before outcomes exist. Rows with any missing feature are
+  dropped rather than imputed, and below a row threshold the fit returns nothing
+  rather than a model fitted to noise.
+- 18 tests, including one that plants a known linear relationship and requires
+  the fit to recover it.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

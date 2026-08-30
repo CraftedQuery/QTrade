@@ -58,7 +58,7 @@ review comments.
 | Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ✅ Shipped | 0.2 | Top-N by 12-1 momentum, equally weighted |
 | Configurable rebalance frequency | ✅ Shipped | 0.2 | Monthly default, weekly, daily; derived from observed sessions |
-| Regularized linear model | ⬜ Planned | 0.2 | |
+| Regularized linear model | ✅ Shipped | 0.2 | Ridge, fitted per fold; incomplete rows dropped, never imputed |
 | One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
 
