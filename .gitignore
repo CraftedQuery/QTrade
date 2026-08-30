@@ -1,0 +1,44 @@
+# --- Secrets: never commit ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --- Environments ---
+.venv/
+venv/
+env/
+
+# --- Tooling caches ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- Lab data and artifacts (regenerated, never source of truth) ---
+data/
+artifacts/
+mlruns/
+*.parquet
+*.duckdb
+*.sqlite3
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+.DS_Store

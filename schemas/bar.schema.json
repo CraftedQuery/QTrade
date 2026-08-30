@@ -1,0 +1,151 @@
+{
+  "$defs": {
+    "BarInterval": {
+      "description": "Supported OHLCV bar intervals.",
+      "enum": [
+        "1min",
+        "5min",
+        "15min",
+        "1hour",
+        "1day"
+      ],
+      "title": "BarInterval",
+      "type": "string"
+    },
+    "PriceAdjustment": {
+      "description": "How corporate actions have been applied to a bar's prices.\n\nRecorded explicitly because silently mixing adjusted and raw series is a\nclassic source of fake backtest performance.",
+      "enum": [
+        "raw",
+        "split",
+        "split_and_dividend"
+      ],
+      "title": "PriceAdjustment",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/bar.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A single OHLCV bar over the half-open interval ``[ts_start, ts_end)``.\n\nThe bar's contents are not knowable until ``ts_end``. Use\n:attr:`information_time`, never ``ts_start``, when deciding whether a bar may\nfeed a feature computed at some decision time.",
+  "properties": {
+    "adjustment": {
+      "$ref": "#/$defs/PriceAdjustment",
+      "description": "Corporate-action adjustment applied."
+    },
+    "close": {
+      "description": "Last trade price in the window.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Close",
+      "type": "string"
+    },
+    "high": {
+      "description": "Highest trade price in the window.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "High",
+      "type": "string"
+    },
+    "ingested_at": {
+      "description": "When the lab stored the bar.",
+      "format": "date-time",
+      "title": "Ingested At",
+      "type": "string"
+    },
+    "interval": {
+      "$ref": "#/$defs/BarInterval",
+      "description": "Bar width."
+    },
+    "low": {
+      "description": "Lowest trade price in the window.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Low",
+      "type": "string"
+    },
+    "open": {
+      "description": "First trade price in the window.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Open",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "description": "Data provider this bar came from.",
+      "title": "Source",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "Instrument ticker.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Symbol",
+      "type": "string"
+    },
+    "trade_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Number of trades.",
+      "title": "Trade Count"
+    },
+    "ts_end": {
+      "description": "Exclusive end of the bar window.",
+      "format": "date-time",
+      "title": "Ts End",
+      "type": "string"
+    },
+    "ts_start": {
+      "description": "Inclusive start of the bar window.",
+      "format": "date-time",
+      "title": "Ts Start",
+      "type": "string"
+    },
+    "volume": {
+      "description": "Shares traded in the window.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Volume",
+      "type": "string"
+    },
+    "vwap": {
+      "anyOf": [
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Volume-weighted average price.",
+      "title": "Vwap"
+    }
+  },
+  "required": [
+    "symbol",
+    "interval",
+    "ts_start",
+    "ts_end",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "adjustment",
+    "source",
+    "ingested_at"
+  ],
+  "title": "Bar",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}

@@ -1,0 +1,167 @@
+{
+  "$defs": {
+    "AccountMode": {
+      "description": "Trading mode of an account.\n\nThis enum has exactly one member on purpose. Live trading is not merely\ndiscouraged, it is unrepresentable: no valid :class:`~lab.contracts.execution.Order`\ncan describe a live order.",
+      "enum": [
+        "paper"
+      ],
+      "title": "AccountMode",
+      "type": "string"
+    },
+    "OrderStatus": {
+      "description": "Lifecycle state of an order.",
+      "enum": [
+        "pending_new",
+        "accepted",
+        "partially_filled",
+        "filled",
+        "canceled",
+        "rejected",
+        "expired"
+      ],
+      "title": "OrderStatus",
+      "type": "string"
+    },
+    "OrderType": {
+      "description": "Supported order types.",
+      "enum": [
+        "market",
+        "limit"
+      ],
+      "title": "OrderType",
+      "type": "string"
+    },
+    "Side": {
+      "description": "Order side.\n\n``SELL`` may only reduce or close an existing long position; it can never\nopen a short. That invariant is enforced by the position-aware risk engine,\nnot by this enum.",
+      "enum": [
+        "buy",
+        "sell"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "TimeInForce": {
+      "description": "Order lifetime. Regular-session day orders only.",
+      "enum": [
+        "day"
+      ],
+      "title": "TimeInForce",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/order.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An order submitted to the paper broker.\n\n``account_mode`` is typed as :class:`~lab.contracts.enums.AccountMode`, which\nhas one member. A live order is not expressible in this system.",
+  "properties": {
+    "account_mode": {
+      "$ref": "#/$defs/AccountMode",
+      "default": "paper",
+      "description": "Always 'paper'. No other value exists."
+    },
+    "broker_order_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Broker's id, once accepted.",
+      "title": "Broker Order Id"
+    },
+    "client_order_id": {
+      "description": "Idempotency key from derive_client_order_id. Stable across replays.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Client Order Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "description": "Risk decision that authorised this order.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "limit_price": {
+      "anyOf": [
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Required for limit orders only.",
+      "title": "Limit Price"
+    },
+    "order_id": {
+      "description": "Lab-side unique order id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Order Id",
+      "type": "string"
+    },
+    "order_type": {
+      "$ref": "#/$defs/OrderType",
+      "description": "Market or limit."
+    },
+    "quantity": {
+      "description": "Share count. Strictly positive.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Quantity",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "side": {
+      "$ref": "#/$defs/Side",
+      "description": "Buy or sell."
+    },
+    "status": {
+      "$ref": "#/$defs/OrderStatus",
+      "description": "Current lifecycle state."
+    },
+    "submitted_at": {
+      "description": "When the order was sent.",
+      "format": "date-time",
+      "title": "Submitted At",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "Instrument to trade.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Symbol",
+      "type": "string"
+    },
+    "time_in_force": {
+      "$ref": "#/$defs/TimeInForce",
+      "default": "day",
+      "description": "Order lifetime."
+    }
+  },
+  "required": [
+    "order_id",
+    "client_order_id",
+    "decision_id",
+    "symbol",
+    "side",
+    "quantity",
+    "order_type",
+    "status",
+    "submitted_at"
+  ],
+  "title": "Order",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}

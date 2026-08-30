@@ -1,0 +1,180 @@
+{
+  "$defs": {
+    "ApprovedLine": {
+      "additionalProperties": false,
+      "description": "A position the risk engine cleared for execution, in shares.",
+      "properties": {
+        "quantity": {
+          "description": "Share count. Strictly positive.",
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "title": "Quantity",
+          "type": "string"
+        },
+        "side": {
+          "$ref": "#/$defs/Side",
+          "description": "Buy to open or add, sell to reduce or close."
+        },
+        "symbol": {
+          "description": "Instrument to trade.",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Symbol",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol",
+        "side",
+        "quantity"
+      ],
+      "title": "ApprovedLine",
+      "type": "object"
+    },
+    "LimitCheck": {
+      "additionalProperties": false,
+      "description": "One deterministic risk limit evaluated against a proposal.",
+      "properties": {
+        "breached": {
+          "description": "Whether the observed value violates the limit.",
+          "title": "Breached",
+          "type": "boolean"
+        },
+        "limit_id": {
+          "description": "Limit identifier, e.g. 'gross_exposure'.",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Limit Id",
+          "type": "string"
+        },
+        "limit_value": {
+          "description": "Configured threshold.",
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "title": "Limit Value",
+          "type": "string"
+        },
+        "observed_value": {
+          "description": "Value measured for this proposal.",
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "title": "Observed Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "limit_id",
+        "limit_value",
+        "observed_value",
+        "breached"
+      ],
+      "title": "LimitCheck",
+      "type": "object"
+    },
+    "RiskOutcome": {
+      "description": "Verdict of the deterministic risk engine on a proposal.",
+      "enum": [
+        "approved",
+        "reduced",
+        "rejected"
+      ],
+      "title": "RiskOutcome",
+      "type": "string"
+    },
+    "Side": {
+      "description": "Order side.\n\n``SELL`` may only reduce or close an existing long position; it can never\nopen a short. That invariant is enforced by the position-aware risk engine,\nnot by this enum.",
+      "enum": [
+        "buy",
+        "sell"
+      ],
+      "title": "Side",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/risk_decision.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The deterministic risk engine's verdict on a proposal.\n\n``risk_config_hash`` pins the exact limit configuration used, so a decision\ncan be recomputed and compared byte for byte. There is no field through\nwhich a model could alter limits, sizing, or the kill switch.",
+  "properties": {
+    "approved_lines": {
+      "description": "Cleared trades. Empty when rejected.",
+      "items": {
+        "$ref": "#/$defs/ApprovedLine"
+      },
+      "title": "Approved Lines",
+      "type": "array"
+    },
+    "checks": {
+      "description": "Every limit evaluated, breached or not.",
+      "items": {
+        "$ref": "#/$defs/LimitCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "data_staleness_seconds": {
+      "description": "Age of the newest market data at decision time.",
+      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+      "title": "Data Staleness Seconds",
+      "type": "string"
+    },
+    "decided_at": {
+      "description": "When the decision was made.",
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "decision_id": {
+      "description": "Unique decision id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "kill_switch_engaged": {
+      "description": "Whether the kill switch was active.",
+      "title": "Kill Switch Engaged",
+      "type": "boolean"
+    },
+    "outcome": {
+      "$ref": "#/$defs/RiskOutcome",
+      "description": "Approved, reduced, or rejected."
+    },
+    "proposal_id": {
+      "description": "Proposal this decision judges.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "reason": {
+      "description": "Human-readable explanation, especially when not approved.",
+      "title": "Reason",
+      "type": "string"
+    },
+    "risk_config_hash": {
+      "description": "Hash of the risk limits applied.",
+      "minLength": 8,
+      "title": "Risk Config Hash",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision_id",
+    "proposal_id",
+    "decided_at",
+    "outcome",
+    "risk_config_hash",
+    "checks",
+    "approved_lines",
+    "kill_switch_engaged",
+    "data_staleness_seconds",
+    "reason"
+  ],
+  "title": "RiskDecision",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}

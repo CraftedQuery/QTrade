@@ -1,0 +1,116 @@
+{
+  "$defs": {
+    "AssetClass": {
+      "description": "Instrument categories in scope. Options, futures and crypto are absent.",
+      "enum": [
+        "us_equity",
+        "us_etf"
+      ],
+      "title": "AssetClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://ai-trading-lab.local/schemas/instrument.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A tradable U.S. equity or ETF.\n\n``listed_on`` and ``delisted_on`` exist so that universe membership can be\nreconstructed *as of a past date*. Without them a universe built from a\ncurrent constituent list is survivorship-biased, which flatters every\nbacktest that uses it.",
+  "properties": {
+    "asset_class": {
+      "$ref": "#/$defs/AssetClass",
+      "description": "Instrument category."
+    },
+    "currency": {
+      "const": "USD",
+      "default": "USD",
+      "description": "Quote currency.",
+      "title": "Currency",
+      "type": "string"
+    },
+    "delisted_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Last trading date. None means still listed.",
+      "title": "Delisted On"
+    },
+    "exchange": {
+      "description": "Primary listing exchange, e.g. 'NASDAQ'.",
+      "title": "Exchange",
+      "type": "string"
+    },
+    "is_tradable": {
+      "default": true,
+      "description": "Whether the lab may trade it today.",
+      "title": "Is Tradable",
+      "type": "boolean"
+    },
+    "listed_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "First trading date, if known. Required for point-in-time universes.",
+      "title": "Listed On"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Issuer or fund name.",
+      "title": "Name"
+    },
+    "retrieved_at": {
+      "description": "When the record was fetched.",
+      "format": "date-time",
+      "title": "Retrieved At",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "description": "Contract version this record was written under.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "description": "Data provider this record came from.",
+      "title": "Source",
+      "type": "string"
+    },
+    "symbol": {
+      "description": "Exchange ticker, e.g. 'SPY'.",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Symbol",
+      "type": "string"
+    }
+  },
+  "required": [
+    "symbol",
+    "asset_class",
+    "exchange",
+    "source",
+    "retrieved_at"
+  ],
+  "title": "Instrument",
+  "type": "object",
+  "x-contract-version": "0.1.0"
+}
