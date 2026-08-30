@@ -66,6 +66,18 @@ approved, reduced, or rejected. Final authority over every order.
 **Kill switch** — an operator control that halts all trading. When engaged, every
 risk decision must be a rejection.
 
+**Risk limits** — the hard ceilings the risk engine enforces: position cap, gross
+exposure cap, name count, daily loss halt, drawdown stop, data staleness. Held in
+`configs/risk.yaml`, overridable with `LAB_RISK_*`, read once at startup.
+
+**Provisional limits** — risk limits that are conservative placeholders rather
+than the owner's real numbers. Flagged by `owner_approved: false`; the lab
+reports its own limits as provisional until the mandate is completed.
+
+**Config hash** — a deterministic hash of the resolved risk limits, stamped onto
+every risk decision so the decision stays recomputable and you can always tell
+which rules an order was checked against.
+
 **Stale data halt** — refusing to trade on market data older than a threshold.
 
 **Idempotency / client order ID** — a deterministic key derived from the risk

@@ -39,11 +39,15 @@ look-ahead tests pass against real features.
 
 ## Release 0.3 — Paper execution and risk ⬜
 
-*Weeks 5–6.* **Needs the owner mandate numbers** — see
-[`../00_owner_mandate.md`](../00_owner_mandate.md) §3.
+*Weeks 5–6.* Risk limits are already configurable in `configs/risk.yaml`; they
+ship as **provisional placeholders** and report themselves as such until
+[`../00_owner_mandate.md`](../00_owner_mandate.md) §3 is completed and
+`owner_approved` is set. Release 0.3 refuses to run an unattended session while
+the limits are provisional.
 
 - Trade proposals generated from the baseline
-- Deterministic limits: gross exposure, name cap, daily loss, stale data
+- Deterministic limits enforced: gross exposure, name cap, daily loss, stale data
+  (the values themselves are configurable as of 0.1)
 - Kill switch
 - Alpaca **paper** adapter with idempotent client order IDs
 - Reconciliation of local state against the broker after restart

@@ -7,9 +7,16 @@ never been committed. It is created here as an empty template. No agent may
 invent values for it — the numbers below constrain real risk decisions, and a
 guessed number is worse than a blank one.
 
-Until the **Capital and risk** section is filled in, position sizing and the
-risk limits in Weeks 5–6 cannot be implemented. Everything through Week 4 can
-proceed without it.
+The **Capital and risk** numbers below are not hard-coded anywhere. They live in
+`configs/risk.yaml` and can be changed without touching code — or overridden per
+run with `LAB_RISK_*` environment variables. Until you fill in section 3 and set
+`owner_approved: true`, the lab runs on conservative provisional placeholders and
+reports its limits as provisional.
+
+Precedence: built-in defaults < `configs/risk.yaml` < `LAB_RISK_*`.
+
+Limits are read once at startup and never change mid-session, so every risk
+decision stays recomputable from the config hash it stores.
 
 ---
 
@@ -34,14 +41,20 @@ proceed without it.
 Paper trading only. These figures size the **simulated** book and calibrate the
 risk engine. They are not an instruction to deploy real money.
 
-| Item | Value |
-|---|---|
-| Simulated starting capital |  |
-| Maximum position size, % of book |  |
-| Maximum gross exposure, % of book |  |
-| Maximum daily loss before halt, % |  |
-| Maximum drawdown before stop, % |  |
-| Maximum names held at once |  |
+Each row maps to a setting in `configs/risk.yaml`. Fill these in, copy them
+across, and set `owner_approved: true`.
+
+| Item | Value | `configs/risk.yaml` key | Provisional default |
+|---|---|---|---|
+| Simulated starting capital |  | `starting_capital` | 100000 |
+| Maximum position size, fraction of book |  | `max_position_weight` | 0.05 |
+| Maximum gross exposure, fraction of book |  | `max_gross_exposure` | 0.60 |
+| Maximum daily loss before halt, fraction |  | `max_daily_loss` | 0.02 |
+| Maximum drawdown before stop, fraction |  | `max_drawdown` | 0.10 |
+| Maximum names held at once |  | `max_positions` | 20 |
+| Maximum market-data age before halt, seconds |  | `max_data_staleness_seconds` | 300 |
+
+Values are fractions, not percentages: 2% is `0.02`.
 
 ## 4. Data sources
 

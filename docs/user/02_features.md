@@ -75,7 +75,8 @@ review comments.
 | Deterministic idempotent client order IDs | ✅ Shipped | 0.1 | Pure function of the decision |
 | Broker vs. shadow fill separation | ✅ Shipped | 0.1 | Never merged, never overwritten |
 | Alpaca **paper** adapter | ⬜ Planned | 0.3 | Paper endpoint only |
-| Live gross exposure / name cap / daily loss limits | ⬜ Planned | 0.3 | Needs the owner mandate numbers |
+| Configurable risk limits (file + env, hashed) | ✅ Shipped | 0.1 | `configs/risk.yaml`, `LAB_RISK_*`; provisional until the mandate is completed |
+| Risk limits enforced against live proposals | ⬜ Planned | 0.3 | The values exist and are validated; enforcement lands with the risk engine |
 | Stale-data halt | ⬜ Planned | 0.3 | |
 | Kill switch | ⬜ Planned | 0.3 | |
 | Position reconciliation after restart | ⬜ Planned | 0.3 | |

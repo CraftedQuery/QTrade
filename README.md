@@ -43,6 +43,7 @@ backtest results:
 | Revised predictions | `Prediction` has no outcome field; outcomes join later as separate records |
 | Shorts and leverage | Weights are bounded to `[0, 1]` and must sum to at most 1 |
 | Model overreach | `RiskDecision` has no field an LLM could write to, and a test keeps it that way |
+| Silently changed limits | Risk limits are read once at startup and hashed onto every decision |
 | Live trading | `AccountMode` has exactly one member, `paper` |
 | Duplicate orders | `client_order_id` is a pure function of the risk decision |
 | Optimistic fills | Broker paper fills and pessimistic internal shadow fills are stored separately and never merged |
@@ -110,6 +111,8 @@ experiment and report the trial count.
 names, a dated universe, walk-forward splits with purge and embargo, and a
 momentum baseline judged against cash, SPY, and equal weight.
 
-Release 0.3 (paper execution and risk) is blocked until
-[`docs/00_owner_mandate.md`](docs/00_owner_mandate.md) §3 is filled in — position
-sizing and risk limits need the owner's real numbers, not guessed ones.
+Risk limits are configurable in [`configs/risk.yaml`](configs/risk.yaml) and
+overridable with `LAB_RISK_*`, so Release 0.3 is no longer blocked on the owner
+mandate. The shipped values are conservative placeholders that report themselves
+as provisional until [`docs/00_owner_mandate.md`](docs/00_owner_mandate.md) §3 is
+completed and `owner_approved` is set.

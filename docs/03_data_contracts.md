@@ -107,7 +107,9 @@ Three invariants are enforced at construction:
 - rejected → `approved_lines` **must** be empty.
 
 `risk_config_hash` pins the exact limit configuration used, so any decision can
-be recomputed and compared. There is no field through which a model could alter
+be recomputed and compared. It comes from `RiskLimits.config_hash` in
+`lab.config`; see [`user/04_getting_started.md`](user/04_getting_started.md#changing-the-risk-limits)
+for how limits are configured. There is no field through which a model could alter
 limits, sizing, or the kill switch — a test asserts no such field is ever added.
 
 ### `Order` — an order sent to the paper broker

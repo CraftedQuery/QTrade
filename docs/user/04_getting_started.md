@@ -59,6 +59,55 @@ way.
 
 > **Never** paste keys into an agent prompt, a log, an issue, or a cloud VM.
 
+## Changing the risk limits
+
+The risk numbers are configuration, not code. They resolve in three layers, each
+beating the one before:
+
+```
+built-in defaults  <  configs/risk.yaml  <  LAB_RISK_* environment variables
+```
+
+Edit the file for a lasting change:
+
+```yaml
+# configs/risk.yaml
+risk:
+  max_position_weight: 0.03
+  max_gross_exposure: 0.50
+```
+
+Or override for a single run:
+
+```bash
+LAB_RISK_MAX_POSITION_WEIGHT=0.03 uv run python -m lab.experiments.baseline
+```
+
+Read them from Python:
+
+```python
+from lab.config import load_risk_limits
+
+limits = load_risk_limits()
+limits.max_position_weight   # Decimal('0.05')
+limits.is_provisional        # True until the owner mandate is completed
+limits.config_hash           # stamped onto every RiskDecision
+```
+
+Values are fractions, not percentages: 2% is `0.02`.
+
+Incoherent combinations are rejected at load time rather than at trade time —
+a position cap above the gross cap, a daily loss limit above the drawdown stop,
+or a name count that cannot reach the gross target.
+
+> Limits are read once at startup and never change mid-session. Every risk
+> decision stores a hash of the limits it was checked against, so it stays
+> recomputable. Change a limit and restart; the hash changes with it.
+
+The shipped values are conservative placeholders. Replace them with your own in
+[`../00_owner_mandate.md`](../00_owner_mandate.md) §3, copy them into
+`configs/risk.yaml`, and set `owner_approved: true`.
+
 ## Commands
 
 | Command | Does |

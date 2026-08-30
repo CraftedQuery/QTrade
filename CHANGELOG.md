@@ -7,7 +7,29 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+- Configurable deterministic risk limits (`src/lab/config.py`, `configs/risk.yaml`).
+  Limits resolve from built-in defaults, then the config file, then `LAB_RISK_*`
+  environment variables, so the owner's numbers can be changed without touching
+  code. Incoherent combinations are rejected at load time.
+- `RiskLimits.config_hash` — a deterministic hash of the numeric limits, for
+  `RiskDecision.risk_config_hash`. Approving unchanged numbers does not change
+  the hash, so decisions stay comparable across that event.
+- `RiskLimits.is_provisional` — the lab can tell whether it is running on the
+  owner's real numbers or on placeholders.
+- `LAB_RISK_*` placeholders in `.env.example`.
+- 22 tests covering layering, coercion, invariants, and hashing.
+
+### Changed
+- `docs/00_owner_mandate.md` §3 now maps each row to its `configs/risk.yaml` key
+  and shows the provisional default. Filling it in is no longer a hard blocker
+  for Release 0.3 — the lab runs on flagged placeholders until then.
+- Added `pyyaml` as a runtime dependency (needed to read `configs/risk.yaml`).
+
+### Security
+- Risk limits are read once at startup and are never mutable at runtime. A limit
+  that could move mid-session would make the audit trail meaningless, and no
+  model output may reach them: `RiskLimits` exposes no mutation method.
 
 ## [0.1.0] — 2026-08-30
 
