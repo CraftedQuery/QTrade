@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Phase A complete (tasks 1-4); task 5 next.
+**Status:** approved 2026-08-30. Tasks 1-5 done; task 6 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -38,7 +38,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 2 | Deterministic synthetic bar generator | A | ✅ Done | |
 | 3 | Dated universe with membership by date | A | ✅ Done | |
 | 4 | Walk-forward splitter with purge and embargo | A | ✅ Done | |
-| 5 | Feature pipeline with derived information cutoff | B | ⬜ Not started | **#2** |
+| 5 | Feature pipeline with derived information cutoff | B | ✅ Done | **#2** |
 | 6 | Forward-return labels with explicit horizon | B | ⬜ Not started | |
 | 7 | Baseline strategies + rebalance schedules | B | ⬜ Not started | |
 | 8 | Regularized linear (ridge) model | B | ⬜ Not started | |
@@ -183,8 +183,6 @@ time split, which is the leak this module exists to prevent.
 
 #### 5. Feature pipeline with derived information cutoff — closes acceptance #2
 
-> Next up.
-
 Compute `FeatureSnapshot` records where `information_cutoff` is **derived from the
 maximum `Bar.information_time` actually consumed**, never asserted by hand.
 
@@ -197,7 +195,25 @@ invariant and a pipeline that *maintains* it. If the cutoff is passed in as an
 argument, the guarantee is decorative. It must be computed by the code that reads
 the bars.
 
+**Resolved as built:** `BarWindow` is the mechanism. It admits only bars whose
+`information_time` falls at or before the decision time, and it records the
+newest bar it actually handed out — so the cutoff is a *consequence of reading*,
+never an argument. A feature function cannot see a future bar (the window does
+not contain one) and cannot understate what it read (the window reports the
+cutoff, not the function).
+
+Acceptance test #2 is closed by truncation: computing snapshots from the full
+history and from a history with every future bar deleted must produce identical
+records. A second test plants a 9999-priced bar one day after the decision time
+and requires every value to be unchanged. Deciding mid-session correctly falls
+back to the previous close, since today's bar has not closed yet.
+
+Missing lookbacks yield `None`, never an imputed value — a short history must not
+become a fabricated signal. `is_complete()` lets models skip those rows.
+
 #### 6. Forward-return labels
+
+> Next up.
 
 Labels with an explicit horizon, aware of the purge from task 4.
 
@@ -287,7 +303,7 @@ contain planted leaks that real data cannot.
 | # | Test | Before 0.2 | After 0.2 |
 |---|---|---|---|
 | 1 | Replaying a proposal cannot create a second broker order | 🟡 Contract level | 🟡 Contract level — end to end in 0.3 |
-| 2 | Features at *t* cannot read prices after *t* | 🟡 Contract level | ✅ End to end (task 5) |
+| 2 | Features at *t* cannot read prices after *t* | 🟡 Contract level | ✅ **Closed** — end to end (task 5) |
 | 3 | Holdout evaluation separate from training code | ⬜ | ✅ (task 11) |
 | 4 | LLM outage degrades to quant-only | ⬜ | ⬜ — 0.4 |
 | 5 | `.env` absent from git | ✅ | ✅ |

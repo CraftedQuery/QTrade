@@ -41,6 +41,13 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   rejected as a plain time split.
 - 448 split assertions across a 144-configuration grid, plus a test that proves
   the naive split does leak so the purge test cannot pass vacuously.
+- `lab.features` — feature computation whose `information_cutoff` is **derived**
+  from the bars actually read, via `BarWindow`, rather than supplied by the
+  caller. Closes acceptance test #2 end to end. Feature set `momentum_v1`:
+  21- and 63-session momentum, 12-1 skip-month momentum, and 21-session realized
+  volatility. A missing lookback yields `None`, never an imputed value.
+- 26 tests, including one that computes snapshots from the full history and from
+  a future-truncated history and requires the records to be identical.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across
