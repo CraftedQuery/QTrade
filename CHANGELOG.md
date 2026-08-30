@@ -34,6 +34,13 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   lack listing dates is marked `survivorship_biased` on the record.
 - 17 tests, including one that builds the same universe from the full history and
   from a future-truncated history and requires past membership to be identical.
+- `lab.evaluation.splits` — walk-forward folds with purge and embargo, counted in
+  trading sessions rather than calendar days. Purge compares a training row's
+  full label window against the test start, so a forward label cannot reach
+  across the boundary. A configuration with zero horizon, purge and embargo is
+  rejected as a plain time split.
+- 448 split assertions across a 144-configuration grid, plus a test that proves
+  the naive split does leak so the purge test cannot pass vacuously.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

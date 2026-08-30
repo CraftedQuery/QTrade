@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Tasks 1-3 done; task 4 next.
+**Status:** approved 2026-08-30. Phase A complete (tasks 1-4); task 5 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -37,7 +37,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 1 | Data dependencies + `lab/store/` Parquet + DuckDB layer | A | ✅ Done | |
 | 2 | Deterministic synthetic bar generator | A | ✅ Done | |
 | 3 | Dated universe with membership by date | A | ✅ Done | |
-| 4 | Walk-forward splitter with purge and embargo | A | ⬜ Not started | |
+| 4 | Walk-forward splitter with purge and embargo | A | ✅ Done | |
 | 5 | Feature pipeline with derived information cutoff | B | ⬜ Not started | **#2** |
 | 6 | Forward-return labels with explicit horizon | B | ⬜ Not started | |
 | 7 | Baseline strategies + rebalance schedules | B | ⬜ Not started | |
@@ -158,8 +158,6 @@ with any result built on it.
 
 #### 4. Walk-forward splitter with purge and embargo
 
-> Next up.
-
 A pure function: date range, label horizon, purge, embargo → ordered
 `(train, test)` folds. This is the integrity centrepiece of the release.
 
@@ -172,9 +170,20 @@ pure and total (no hidden clock, no I/O).
 feature window. A 21-day forward label observed at *t* contaminates training data
 up to *t*+21, not *t*.
 
+**Resolved as built:** purge compares `i + label_horizon + purge` against the
+test start, never `i` alone. Everything is counted in **trading sessions**, not
+calendar days — using dates would silently shorten the purge across every weekend
+and holiday. The two invariants are property-tested over a 144-configuration grid
+(448 assertions), not spot-checked. One test deliberately constructs the naive
+split and proves it *does* leak, so the purge test cannot pass vacuously. A
+config with zero horizon, purge and embargo is rejected outright: that is a plain
+time split, which is the leak this module exists to prevent.
+
 ### Phase B — features and models
 
 #### 5. Feature pipeline with derived information cutoff — closes acceptance #2
+
+> Next up.
 
 Compute `FeatureSnapshot` records where `information_cutoff` is **derived from the
 maximum `Bar.information_time` actually consumed**, never asserted by hand.

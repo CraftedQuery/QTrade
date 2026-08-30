@@ -43,7 +43,7 @@ review comments.
 | Sealed holdout with unseal timestamp | ✅ Shipped | 0.1 | `holdout_is_sealed` until first viewed |
 | Predictions immutable and outcome-free | ✅ Shipped | 0.1 | Outcomes join later; predictions are never revised |
 | Append-only record semantics | ✅ Shipped | 0.1 | All contracts frozen |
-| Purge/embargo applied in the split generator | ⬜ Planned | 0.2 | The computational half of the guarantee |
+| Purge/embargo applied in the split generator | ✅ Shipped | 0.2 | Counted in trading sessions; property-tested over a config grid |
 | Look-ahead test suite over real features | ⬜ Planned | 0.2 | Acceptance test #2, end to end |
 | Holdout evaluation isolated from training code | ⬜ Planned | 0.2 | Acceptance test #3 |
 | MLflow experiment tracking | ⬜ Planned | 0.3 | Deferred from 0.2; append-only records already give provenance |
