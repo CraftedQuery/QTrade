@@ -14,6 +14,7 @@ from lab.features.compute import (
     compute_snapshots,
     is_complete,
 )
+from lab.features.labels import Label, forward_return, label_symbols, overlaps_window
 from lab.features.window import BarWindow
 
 __all__ = [
@@ -21,7 +22,11 @@ __all__ = [
     "BarWindow",
     "FeatureDef",
     "FeatureSet",
+    "Label",
     "compute_snapshot",
     "compute_snapshots",
+    "forward_return",
     "is_complete",
+    "label_symbols",
+    "overlaps_window",
 ]

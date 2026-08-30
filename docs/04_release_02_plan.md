@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Tasks 1-5 done; task 6 next.
+**Status:** approved 2026-08-30. Tasks 1-6 done; task 7 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -39,7 +39,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 3 | Dated universe with membership by date | A | ✅ Done | |
 | 4 | Walk-forward splitter with purge and embargo | A | ✅ Done | |
 | 5 | Feature pipeline with derived information cutoff | B | ✅ Done | **#2** |
-| 6 | Forward-return labels with explicit horizon | B | ⬜ Not started | |
+| 6 | Forward-return labels with explicit horizon | B | ✅ Done | |
 | 7 | Baseline strategies + rebalance schedules | B | ⬜ Not started | |
 | 8 | Regularized linear (ridge) model | B | ⬜ Not started | |
 | 9 | Cost model `conservative_v1` | C | ⬜ Not started | |
@@ -213,14 +213,24 @@ become a fabricated signal. `is_complete()` lets models skip those rows.
 
 #### 6. Forward-return labels
 
-> Next up.
-
 Labels with an explicit horizon, aware of the purge from task 4.
 
 **Done when:** a label at *t* uses only data strictly after *t*; overlapping label
 windows cannot appear on both sides of a fold boundary.
 
+**Resolved as built:** labels are the mirror image of features — a feature at *t*
+must not read anything after *t*, a label at *t* must read **only** what comes
+after. Every `Label` carries `known_at`, the instant its outcome could first have
+been observed, which is what makes purge computable rather than notional:
+`overlaps_window()` answers whether a row's label was still unknown when a test
+window opened. The entry price is the same close a feature at *t* would have
+seen, so features and labels agree on where "now" is; a test pins that. A horizon
+running past the available history yields `None` rather than a return estimated
+from a shorter span.
+
 #### 7. Baseline strategies and rebalance schedules
+
+> Next up.
 
 Cash, buy-and-hold SPY, equal weight, and momentum. Each emits a `Proposal` per
 rebalance date. Rebalance frequency is configurable — monthly default, weekly,

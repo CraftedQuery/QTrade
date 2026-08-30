@@ -48,6 +48,12 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   volatility. A missing lookback yields `None`, never an imputed value.
 - 26 tests, including one that computes snapshots from the full history and from
   a future-truncated history and requires the records to be identical.
+- `lab.features.labels` — forward-return labels carrying `known_at`, the instant
+  the outcome could first have been observed. That timestamp is what makes the
+  splitter's purge computable rather than notional. A horizon running past the
+  available history yields nothing rather than a return over a shorter span.
+- 17 tests, including one pinning that a label's entry price is the same close a
+  feature computed at the same instant would have seen.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across
