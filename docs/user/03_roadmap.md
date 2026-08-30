@@ -25,17 +25,25 @@ enforced in their types rather than left to review.
 
 *Weeks 3–4.*
 
-- Licensed historical bars for ~50 liquid names
+- Licensed historical bars for ~50 liquid names, via **Alpaca**
 - Dated universe with membership by date
 - Explicit information cutoff computed on every feature
 - Walk-forward splits with purge and embargo, in code
 - Baselines: momentum vs. equal weight vs. cash vs. SPY
+- Configurable rebalance frequency: monthly (default), weekly, or daily
 - One command reproduces the baseline from raw inputs
+
+Task-by-task breakdown and locked decisions:
+[`../04_release_02_plan.md`](../04_release_02_plan.md).
 
 **Done when:** the baseline runs end to end on a clean machine and the
 look-ahead tests pass against real features.
 
-**Explicitly not in 0.2:** news, LLM calls, any broker connection.
+**Explicitly not in 0.2:** news, LLM calls, any broker connection, dashboard.
+
+MLflow moved to Release 0.3: the append-only experiment and prediction records
+already provide provenance and reproducibility, so a tracking service does not
+yet answer a question we have.
 
 ## Release 0.3 — Paper execution and risk ⬜
 
@@ -52,6 +60,7 @@ the limits are provisional.
 - Alpaca **paper** adapter with idempotent client order IDs
 - Reconciliation of local state against the broker after restart
 - Conservative internal shadow fills, deliberately worse than paper
+- MLflow experiment tracking (moved from 0.2)
 
 **Done when:** replaying a proposal cannot create a second broker order, and a
 restart reconciles cleanly.

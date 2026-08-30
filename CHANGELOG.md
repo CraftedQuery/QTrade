@@ -8,6 +8,20 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
 ## [Unreleased]
 
 ### Added
+- `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across
+  four phases), a status table to update as work lands, the locked decisions with
+  their rationale, and per-task definitions of done.
+- `schedule.rebalance` in `configs/base.yaml`: monthly (default), weekly, or daily.
+
+### Changed
+- Release 0.2 will source bars from **Alpaca**.
+- MLflow moved from Release 0.2 to 0.3. The append-only experiment and prediction
+  records already provide provenance and reproducibility, so a tracking service
+  does not yet answer a question we have.
+- Trading sessions will be derived from observed bars rather than a calendar
+  library, avoiding a wrong-calendar bug class in purge and embargo.
+
+### Added (0.1 follow-up)
 - Configurable deterministic risk limits (`src/lab/config.py`, `configs/risk.yaml`).
   Limits resolve from built-in defaults, then the config file, then `LAB_RISK_*`
   environment variables, so the owner's numbers can be changed without touching

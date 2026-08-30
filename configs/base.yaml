@@ -28,6 +28,13 @@ walk_forward:
   purge: P21D
   embargo: P5D
 
+schedule:
+  # Rebalance frequency. monthly is the default: standard for momentum, and it
+  # keeps turnover from eating the edge before it can be measured. weekly and
+  # daily are supported so that tradeoff can be measured rather than assumed.
+  # Sessions are derived from observed bars, not from a calendar library.
+  rebalance: monthly   # monthly | weekly | daily
+
 costs:
   model_id: conservative_v1
 

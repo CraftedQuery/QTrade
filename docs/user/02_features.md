@@ -23,7 +23,7 @@ catalogue future releases build against.
 | Corporate-action adjustment tracking | ✅ Shipped | 0.1 | Recorded per bar; prevents mixing adjusted and raw series |
 | Data provenance on every record | ✅ Shipped | 0.1 | `source` and ingestion timestamp |
 | Dated liquid U.S. universe (50 names to start) | ⬜ Planned | 0.2 | Grows toward 100–300 only once membership by date is real |
-| Licensed historical bar ingestion | ⬜ Planned | 0.2 | Licensed APIs only; no scraping |
+| Licensed historical bar ingestion (Alpaca) | ⬜ Planned | 0.2 | Licensed APIs only; no scraping |
 | Parquet + DuckDB local store | ⬜ Planned | 0.2 | |
 | Survivorship warning on non-point-in-time sources | ⬜ Planned | 0.2 | Flags yfinance-style current-membership lists |
 
@@ -46,7 +46,7 @@ review comments.
 | Purge/embargo applied in the split generator | ⬜ Planned | 0.2 | The computational half of the guarantee |
 | Look-ahead test suite over real features | ⬜ Planned | 0.2 | Acceptance test #2, end to end |
 | Holdout evaluation isolated from training code | ⬜ Planned | 0.2 | Acceptance test #3 |
-| MLflow experiment tracking | ⬜ Planned | 0.2 | |
+| MLflow experiment tracking | ⬜ Planned | 0.3 | Deferred from 0.2; append-only records already give provenance |
 | Rank IC, turnover, drawdown, net-of-cost reporting | ⬜ Planned | 0.2 | Win rate is explicitly not a target |
 
 ## 3. Strategy and baselines
@@ -57,6 +57,7 @@ review comments.
 | Benchmark ETF baseline | ⬜ Planned | 0.2 | |
 | Equal-weight baseline | ⬜ Planned | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ⬜ Planned | 0.2 | |
+| Configurable rebalance frequency | ⬜ Planned | 0.2 | Monthly default, weekly, daily |
 | Regularized linear model | ⬜ Planned | 0.2 | |
 | One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |

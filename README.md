@@ -70,6 +70,7 @@ backtest results:
 | [`docs/01_solo_agent_build.md`](docs/01_solo_agent_build.md) | The 8–12 week slice an agent may build |
 | [`docs/02_coding_agent_choice.md`](docs/02_coding_agent_choice.md) | Grok Bot vs. Grok Build vs. Claude Code |
 | [`docs/03_data_contracts.md`](docs/03_data_contracts.md) | Reference for all nine contracts |
+| [`docs/04_release_02_plan.md`](docs/04_release_02_plan.md) | Release 0.2 task breakdown, status, and locked decisions |
 
 ## Layout
 
@@ -107,9 +108,12 @@ experiment and report the trial count.
 
 ## Next up
 
-**Release 0.2 — data and baseline.** Licensed historical bars for ~50 liquid
-names, a dated universe, walk-forward splits with purge and embargo, and a
-momentum baseline judged against cash, SPY, and equal weight.
+**Release 0.2 — data and baseline.** Alpaca historical bars for ~50 liquid names,
+a dated universe, walk-forward splits with purge and embargo, and a momentum
+baseline judged against cash, SPY, and equal weight.
+
+Thirteen tasks, current status, and the locked decisions:
+[`docs/04_release_02_plan.md`](docs/04_release_02_plan.md).
 
 Risk limits are configurable in [`configs/risk.yaml`](configs/risk.yaml) and
 overridable with `LAB_RISK_*`, so Release 0.3 is no longer blocked on the owner
