@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. Task 1 done; task 2 next.
+**Status:** approved 2026-08-30. Tasks 1-2 done; task 3 next.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -35,7 +35,7 @@ Build the pipeline first. Plug the real data in at the end.
 | # | Task | Phase | Status | Closes |
 |---|---|---|---|---|
 | 1 | Data dependencies + `lab/store/` Parquet + DuckDB layer | A | ✅ Done | |
-| 2 | Deterministic synthetic bar generator | A | ⬜ Not started | |
+| 2 | Deterministic synthetic bar generator | A | ✅ Done | |
 | 3 | Dated universe with membership by date | A | ⬜ Not started | |
 | 4 | Walk-forward splitter with purge and embargo | A | ⬜ Not started | |
 | 5 | Feature pipeline with derived information cutoff | B | ⬜ Not started | **#2** |
@@ -113,8 +113,6 @@ become floats and reconciliation will drift later.
 
 #### 2. Deterministic synthetic bar generator
 
-> Next up.
-
 A seeded generator producing realistic OHLCV for N symbols over a date range,
 living in `tests/` (test-only, never shipped as a data source).
 
@@ -128,7 +126,17 @@ the `Bar` contract holds; the generator can construct each edge case above.
 **Why it comes second:** every later task depends on it, and it is what makes the
 integrity tests provable rather than merely plausible.
 
+**Resolved as built:** lives in `tests/synthetic.py`, and a test asserts no
+`lab.*` module references it — synthetic prices must never reach a real
+experiment. Per-symbol seeding uses a SHA-256 digest, not `hash()`: Python
+randomises string hashing per process, so `hash()` would have broken determinism
+between runs while looking correct inside any single one. A subprocess test now
+pins that across three `PYTHONHASHSEED` values. Sessions are weekday 13:30-20:00
+UTC with no holiday calendar or DST — real sessions come from observed data (D3).
+
 #### 3. Dated universe
+
+> Next up.
 
 Build a universe from instruments plus a liquidity screen. `members_on(date)`
 answers membership as of a past date, on top of `Instrument.was_listed_on`.

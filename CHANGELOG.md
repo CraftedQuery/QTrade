@@ -20,6 +20,13 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   resolved now so later tasks do not each churn the lock file.
 - 32 tests covering decimal fidelity, timestamp precision, idempotency,
   corrections, filtering, and layout.
+- `tests/synthetic.py` — deterministic synthetic market data. Seeded per symbol
+  so adding a symbol leaves the others untouched, with knobs for the edge cases
+  the integrity tests need: mid-range delisting, series gaps, raw-price splits,
+  and bars past a decision time. A test asserts no `lab.*` module imports it, so
+  synthetic prices cannot reach a real experiment.
+- 22 tests covering determinism (including across processes), OHLC validity,
+  session handling, and each edge case.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across
