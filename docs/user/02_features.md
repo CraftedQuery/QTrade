@@ -45,9 +45,9 @@ review comments.
 | Append-only record semantics | ✅ Shipped | 0.1 | All contracts frozen |
 | Purge/embargo applied in the split generator | ✅ Shipped | 0.2 | Counted in trading sessions; property-tested over a config grid |
 | Look-ahead test suite over real features | ✅ Shipped | 0.2 | Acceptance test #2 closed; cutoff derived from bars actually read |
-| Holdout evaluation isolated from training code | ⬜ Planned | 0.2 | Acceptance test #3 |
+| Holdout evaluation isolated from training code | ✅ Shipped | 0.2 | Acceptance #3 closed; enforced on the real import graph |
 | MLflow experiment tracking | ⬜ Planned | 0.3 | Deferred from 0.2; append-only records already give provenance |
-| Rank IC, turnover, drawdown, net-of-cost reporting | ⬜ Planned | 0.2 | Win rate is explicitly not a target |
+| Rank IC, turnover, drawdown, net-of-cost reporting | ✅ Shipped | 0.2 | Rank IC under both conventions; win rate reported, never a target |
 
 ## 3. Strategy and baselines
 
@@ -58,6 +58,7 @@ review comments.
 | Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ✅ Shipped | 0.2 | Top-N by 12-1 momentum, equally weighted |
 | Configurable rebalance frequency | ✅ Shipped | 0.2 | Monthly default, weekly, daily; derived from observed sessions |
+| Transaction cost model | ✅ Shipped | 0.2 | Conservative by default; a zero-cost model is rejected at construction |
 | Regularized linear model | ✅ Shipped | 0.2 | Ridge, fitted per fold; incomplete rows dropped, never imputed |
 | One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |

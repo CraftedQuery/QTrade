@@ -39,10 +39,10 @@ Task-by-task breakdown and locked decisions:
 **Done when:** the baseline runs end to end on a clean machine and the
 look-ahead tests pass against real features.
 
-**Progress:** 8 of 13 tasks done. Storage, synthetic data, universe, splitter,
-features, labels, strategies and the ridge model are built. Costs, metrics,
-holdout isolation, the experiment runner and the Alpaca adapter remain — so no
-result has been produced yet. Task detail:
+**Progress:** 11 of 13 tasks done. Everything except the experiment runner and
+the Alpaca adapter is built. The pipeline runs end to end on synthetic data, but
+**no research result has been produced** — synthetic prices cannot validate a
+strategy, and no real market data has been ingested. Task detail:
 [`../04_release_02_plan.md`](../04_release_02_plan.md).
 
 **Explicitly not in 0.2:** news, LLM calls, any broker connection, dashboard.
@@ -124,8 +124,8 @@ Tracked across releases. These are the checks that keep results believable.
 | # | Test | Status |
 |---|---|---|
 | 1 | Replaying the same proposal cannot create a second broker order | 🟡 Contract-level (0.1) → end to end in 0.3 |
-| 2 | Features computed at *t* cannot read prices after *t* | 🟡 Contract-level (0.1) → end to end in 0.2 |
-| 3 | Holdout evaluation is separate from training code | ⬜ 0.2 |
+| 2 | Features computed at *t* cannot read prices after *t* | ✅ Closed end to end (0.2, task 5) |
+| 3 | Holdout evaluation is separate from training code | ✅ Closed (0.2, task 11) |
 | 4 | LLM outage degrades to quant-only; risk engine still runs | ⬜ 0.4 |
 | 5 | `.env` is absent from git | ✅ Shipped (0.1) |
 | 6 | `pytest` and a baseline experiment run on a clean machine from documented steps | 🟡 Tests ship in 0.1; baseline in 0.2 |

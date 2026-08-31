@@ -1,11 +1,24 @@
-"""Evaluation machinery: walk-forward splitting, and later metrics and holdout.
+"""Evaluation machinery: walk-forward splitting, metrics, and the holdout read.
 
-Nothing in this package may import training code, and training code may not
-import the holdout evaluator. See Release 0.2 task 11.
+:mod:`lab.evaluation.holdout` is deliberately **not** re-exported here. Importing
+this package must not pull the holdout evaluator into a training path — the
+isolation required by acceptance test #3 is enforced on the real import graph, so
+a convenience re-export would break it. Import it explicitly, from evaluation
+code only.
 """
 
 from __future__ import annotations
 
+from lab.evaluation.metrics import (
+    PerformanceSummary,
+    RankIC,
+    equity_curve,
+    max_drawdown,
+    rank_ic,
+    spearman,
+    summarise,
+    turnover,
+)
 from lab.evaluation.splits import (
     DatedFold,
     Fold,
@@ -17,7 +30,15 @@ from lab.evaluation.splits import (
 __all__ = [
     "DatedFold",
     "Fold",
+    "PerformanceSummary",
+    "RankIC",
     "WalkForwardConfig",
+    "equity_curve",
+    "max_drawdown",
+    "rank_ic",
+    "spearman",
+    "summarise",
     "to_dated_folds",
+    "turnover",
     "walk_forward_folds",
 ]

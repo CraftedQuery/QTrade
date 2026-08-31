@@ -66,6 +66,18 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   rather than a model fitted to noise.
 - 18 tests, including one that plants a known linear relationship and requires
   the fit to recover it.
+- `lab.costs` — transaction costs, conservative by default (3 bps half-spread,
+  2 bps slippage, $0.005/share). A model with zero spread *and* zero slippage is
+  rejected at construction: it produces flattering results by definition.
+- `lab.evaluation.metrics` — rank IC under **both** conventions (per-date with
+  std and t-stat, and pooled, plus the gap between them), turnover, max drawdown,
+  and gross/net performance summaries. Hit rate is reported and explicitly not a
+  target.
+- `lab.evaluation.holdout` — the single, final holdout read. Closes acceptance
+  test #3: a test walks the real import graph and asserts training code cannot
+  reach the evaluator through any chain of imports. Unsealing stamps the
+  experiment and returns a new record; a second evaluation raises.
+- 61 tests across costs, metrics and holdout isolation.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

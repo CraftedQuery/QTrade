@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. **Phases A and B complete (tasks 1-8).** Task 9 next; Phase C is the whole remainder except the Alpaca adapter.
+**Status:** approved 2026-08-30. **Tasks 1-11 done.** Task 12 (experiment runner) is the last piece before the Alpaca adapter.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -42,9 +42,9 @@ Build the pipeline first. Plug the real data in at the end.
 | 6 | Forward-return labels with explicit horizon | B | ✅ Done | |
 | 7 | Baseline strategies + rebalance schedules | B | ✅ Done | |
 | 8 | Regularized linear (ridge) model | B | ✅ Done | |
-| 9 | Cost model `conservative_v1` | C | ⬜ Not started | |
-| 10 | Metrics: rank IC, turnover, drawdown, net of cost | C | ⬜ Not started | |
-| 11 | Holdout evaluation isolated from training | C | ⬜ Not started | **#3** |
+| 9 | Cost model `conservative_v1` | C | ✅ Done | |
+| 10 | Metrics: rank IC, turnover, drawdown, net of cost | C | ✅ Done | |
+| 11 | Holdout evaluation isolated from training | C | ✅ Done | **#3** |
 | 12 | Experiment runner + `make experiment-baseline` | C | ⬜ Not started | **#6** |
 | 13 | Alpaca historical bar adapter, 50 liquid names | D | ⬜ Not started | |
 
@@ -276,13 +276,19 @@ recover it, so a broken fit cannot pass silently.
 
 #### 9. Cost model `conservative_v1`
 
-> Next up.
-
 Spread plus commission applied to turnover. Assumptions written down, not
 implied.
 
 **Done when:** net-of-cost returns differ from gross; the cost of a given turnover
 is reproducible and documented; the model is pessimistic by design, and says so.
+
+**Resolved as built:** 3 bps half-spread + 2 bps slippage per side, plus
+$0.005/share. Alpaca charges no commission on U.S. equities, and modelling zero
+would be defensible on paper and wrong in spirit — it hides the spread and impact,
+which are real whatever the commission schedule says. A cost model with zero
+spread *and* zero slippage is **rejected at construction**: it produces flattering
+results by definition. `FRICTIONLESS` exists only as a reference for showing how
+much of a result costs consume, and is labelled as such.
 
 #### 10. Metrics
 
@@ -291,6 +297,14 @@ SPY / equal-weight comparators.
 
 **Done when:** every baseline reports the full set; trial count travels with every
 performance number; win rate may be reported but is never presented as a target.
+
+**Resolved as built:** rank IC is computed under **both** conventions rather than
+picking one — per-date-then-averaged (with std and t-stat) and pooled. They can
+differ substantially, and `concentration_gap` surfaces that: a large gap means
+skill was bunched into a few dates, which the pooled figure alone would hide.
+Gross and net are both reported so the cost drag is visible rather than buried.
+Hit rate is computed and explicitly not a target — a test demonstrates a 75% hit
+rate that loses money.
 
 #### 11. Holdout isolation — closes acceptance #3
 
@@ -303,7 +317,24 @@ path; unsealing stamps `Experiment.holdout_unsealed_at`.
 **Traps:** "separate function in the same module" does not satisfy this. The
 point is that running training cannot, even by accident, read holdout data.
 
+**Resolved as built:** enforced on the **real import graph**. A test parses every
+module under `src/lab/`, builds the import graph, and asserts that `lab.models`,
+`lab.features` and `lab.strategies` cannot reach `lab.evaluation.holdout` through
+any chain of imports. `lab.evaluation.__init__` deliberately does *not*
+re-export the holdout evaluator — a convenience re-export would pull it onto
+every training path and silently void the guarantee.
+
+A further test proves the graph walker finds real edges, so the isolation test
+cannot pass vacuously.
+
+Unsealing stamps `holdout_unsealed_at` and returns a **new** experiment record
+(records are frozen), so the sealed original survives as history. A second
+evaluation raises `HoldoutAlreadyUnsealedError`: the second look is inevitably
+informed by the first.
+
 #### 12. Experiment runner — closes acceptance #6
+
+> Next up.
 
 `make experiment-baseline` / `uv run python -m lab.experiments.baseline`.
 Registers the `Experiment` **before** any result is computed, runs the folds,
@@ -340,7 +371,7 @@ contain planted leaks that real data cannot.
 |---|---|---|---|
 | 1 | Replaying a proposal cannot create a second broker order | 🟡 Contract level | 🟡 Contract level — end to end in 0.3 |
 | 2 | Features at *t* cannot read prices after *t* | 🟡 Contract level | ✅ **Closed** — end to end (task 5) |
-| 3 | Holdout evaluation separate from training code | ⬜ | ✅ (task 11) |
+| 3 | Holdout evaluation separate from training code | ⬜ | ✅ **Closed** (task 11) |
 | 4 | LLM outage degrades to quant-only | ⬜ | ⬜ — 0.4 |
 | 5 | `.env` absent from git | ✅ | ✅ |
 | 6 | `pytest` and a baseline run on a clean machine | 🟡 Tests only | ✅ (task 12) |
