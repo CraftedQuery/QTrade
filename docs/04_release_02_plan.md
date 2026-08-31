@@ -390,48 +390,52 @@ contain planted leaks that real data cannot.
 
 ## Where we left off
 
-*Last updated after task 8, 2026-08-30.*
+*Last updated after task 11, 2026-08-31.*
 
-**Phases A and B are complete.** Tasks 1–8 are merged to the working branch:
-storage, synthetic data, universe, splitter, features, labels, strategies, model.
-778 tests pass; `make check` is clean.
+**Tasks 1-11 are done.** 840 tests pass; `make check` is clean. Two of the three
+acceptance tests this release owns are closed: **#2** (features at *t* cannot
+read prices after *t*) and **#3** (holdout isolated from training code). **#6**
+closes with task 12.
 
-What exists end to end today: bars can be stored and read back with exact
-decimals; a dated universe answers point-in-time membership; walk-forward folds
-carry purge and embargo; features compute with a derived information cutoff;
-labels carry `known_at`; four baseline strategies emit proposals on monthly,
-weekly or daily schedules; and a ridge model fits per fold and emits predictions.
+The pipeline has been run end to end on synthetic data and every stage works:
+bars stored and read back with exact decimals, point-in-time universe, walk-
+forward folds, features with derived cutoffs, labels, four strategies, a fitted
+ridge model, rank IC, costs, and a single holdout read that refuses a second.
 
-What does **not** exist yet: any transaction cost, any performance metric, any
-holdout isolation, any single command that runs the whole thing, and any real
-market data. Nothing has been evaluated, so **there is no result of any kind** —
-no Sharpe, no rank IC, no comparator table. Do not report one until task 12 has
-run.
+### What has NOT been produced
+
+**No research result of any kind.** The end-to-end run used synthetic data, and
+synthetic prices cannot validate a strategy — the generator plants a per-symbol
+drift, so any apparent skill is the model recovering the generator's own
+construction. That run is a smoke test of the machinery, nothing more. Do not
+quote a number from it.
+
+No real market data has been ingested (task 13), and there is no single command
+that runs the whole thing (task 12).
 
 ### The next task
 
-**Task 9, the cost model.** It has no dependencies beyond what is already built.
-The three that follow are the substance of Phase C:
+**Task 12, the experiment runner.** It wires the existing pieces into one
+command, registers the `Experiment` before any result is computed, and closes
+acceptance #6. Nothing blocks it.
 
-| Next | Task | Why it matters |
-|---|---|---|
-| 9 | Cost model `conservative_v1` | Until costs exist, every number is gross and flattering |
-| 10 | Metrics | Rank IC, turnover, drawdown, net of cost, against the comparators |
-| 11 | Holdout isolation | Closes acceptance #3; training must not be able to import the evaluator |
-| 12 | Experiment runner | Closes acceptance #6; one command, registered before results |
-
-Task 13 (Alpaca) is last and is the only one needing credentials.
+Then **task 13**, the Alpaca adapter — the only task needing credentials, and
+the first point at which a real result becomes possible.
 
 ### Open items carried forward
 
 - **Owner mandate §3 is still empty.** `configs/risk.yaml` ships provisional
-  placeholders flagged `owner_approved: false`. Nothing in 0.2 enforces limits,
-  so this is not blocking here — it stops being harmless when Release 0.3 lands.
-- **Alpaca paper credentials** are needed for task 13 only.
-- **A design question for task 10:** the metrics need a decision on whether rank
-  IC is computed per rebalance date and averaged, or pooled across all dates.
-  Per-date-then-average is standard and more honest about time variation;
-  flagging it rather than silently picking.
+  placeholders flagged `owner_approved: false`. Not blocking in 0.2; it stops
+  being harmless when Release 0.3 lands.
+- **Alpaca paper credentials** — needed for task 13 only.
+- **Cost parameters are my choice, not the owner's.** 3 bps half-spread, 2 bps
+  slippage, $0.005/share. These directly decide whether a strategy looks viable,
+  so they deserve an explicit owner decision before any real result is reported.
+- **Rank IC convention** — both are computed and reported. Which one is the
+  headline number in the freeze report is still open; per-date is the standard
+  and the recommendation.
+- **Universe membership rule for task 13** — which 50 names, or what rule
+  selects them, and which symbol is the benchmark.
 
 ## Resuming a session
 
