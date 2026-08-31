@@ -4,7 +4,7 @@ Weeks 3–4 of [`01_solo_agent_build.md`](01_solo_agent_build.md). This is a liv
 document: update the status column as tasks land, so a new session can pick up
 without re-deriving anything.
 
-**Status:** approved 2026-08-30. **Tasks 1-11 done.** Task 12 (experiment runner) is the last piece before the Alpaca adapter.
+**Status:** approved 2026-08-30. **Tasks 1-12 done.** Only task 13, the Alpaca adapter, remains — and it is the only one needing credentials.
 **Base:** `main` at the 0.1 merge.
 **Scope discipline:** no news, no LLM calls, no dashboard, no broker execution.
 Those are Releases 0.4, 0.5 and 0.3 respectively.
@@ -412,47 +412,55 @@ contain planted leaks that real data cannot.
 
 ## Where we left off
 
-*Last updated after task 11, 2026-08-31.*
+*Last updated after task 12, 2026-08-31.*
 
-**Tasks 1-11 are done.** 840 tests pass; `make check` is clean. Two of the three
-acceptance tests this release owns are closed: **#2** (features at *t* cannot
-read prices after *t*) and **#3** (holdout isolated from training code). **#6**
-closes with task 12.
+**Tasks 1-12 are done. Only task 13 remains.** 864 tests pass; `make check` is
+clean. Acceptance **#2** and **#3** are closed. **#6** is closed in machinery and
+completes in substance with task 13.
 
-The pipeline has been run end to end on synthetic data and every stage works:
-bars stored and read back with exact decimals, point-in-time universe, walk-
-forward folds, features with derived cutoffs, labels, four strategies, a fitted
-ridge model, rank IC, costs, and a single holdout read that refuses a second.
+The full pipeline exists: storage, synthetic data, point-in-time universe,
+walk-forward splits with purge and embargo, features with derived cutoffs,
+labels, four comparators, a ridge model, costs, metrics, portfolio simulation, an
+isolated holdout read, and `make experiment-baseline`.
 
 ### What has NOT been produced
 
-**No research result of any kind.** The end-to-end run used synthetic data, and
-synthetic prices cannot validate a strategy — the generator plants a per-symbol
-drift, so any apparent skill is the model recovering the generator's own
-construction. That run is a smoke test of the machinery, nothing more. Do not
-quote a number from it.
+**No research result of any kind.** `make experiment-baseline` deliberately
+**exits 1** rather than running: no market data has been ingested, and running the
+baseline on synthetic prices would emit a number that means nothing while looking
+exactly like a real result.
 
-No real market data has been ingested (task 13), and there is no single command
-that runs the whole thing (task 12).
+The pipeline *has* been exercised on synthetic data, and momentum "beat" every
+comparator with a Sharpe of 1.08. That is an artifact and nothing more — the
+generator gives each symbol a different planted drift, and a momentum strategy
+selects precisely the high-drift names. The model recovered how the fixture was
+written. **Do not quote any number from a synthetic run.**
 
 ### The next task
 
-**Task 12, the experiment runner.** It wires the existing pieces into one
-command, registers the `Experiment` before any result is computed, and closes
-acceptance #6. Nothing blocks it.
+**Task 13, the Alpaca historical bar adapter.** It is the last task in Release
+0.2 and the first point at which a real result becomes possible.
 
-Then **task 13**, the Alpaca adapter — the only task needing credentials, and
-the first point at which a real result becomes possible.
+It needs two things that do not exist yet:
+
+1. **Alpaca paper credentials** in `.env` (`ALPACA_API_KEY_ID`,
+   `ALPACA_API_SECRET_KEY`). Paper only — there is no live endpoint anywhere in
+   this repository and a test keeps it that way.
+2. **A candidate pool** for the universe screen. The *rule* is settled (top 50 by
+   trailing dollar volume, benchmark SPY); the pool it screens from is not.
+   Alpaca's tradable-asset list is the obvious source.
+
+When it lands, `make experiment-baseline` runs for real and Release 0.2 is done.
 
 ### Open items carried forward
 
 - **Owner mandate §3 is still empty.** `configs/risk.yaml` ships provisional
   placeholders flagged `owner_approved: false`. Not blocking in 0.2; it stops
   being harmless when Release 0.3 lands.
-- **Alpaca paper credentials** — needed for task 13 only.
-- **The candidate universe list for task 13.** The *rule* is settled (top 50 by
-  trailing dollar volume, benchmark SPY); the candidate pool it screens from is
-  not. Alpaca's tradable-asset list is the obvious source.
+- **The candidate pool for task 13**, as above.
+- **Test suite runtime is now ~63 seconds**, most of it the runner tests. Worth
+  watching; if it reaches a few minutes it will start discouraging the habit of
+  running `make check` before every commit.
 
 ## Resuming a session
 

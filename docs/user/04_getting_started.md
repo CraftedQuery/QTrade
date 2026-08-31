@@ -59,6 +59,34 @@ way.
 
 > **Never** paste keys into an agent prompt, a log, an issue, or a cloud VM.
 
+## Changing costs and experiment settings
+
+Both follow the same three-layer pattern as the risk limits:
+
+```
+built-in defaults  <  configs/<file>.yaml  <  LAB_<AREA>_* environment variables
+```
+
+| Setting | File | Environment prefix |
+|---|---|---|
+| Risk limits | `configs/risk.yaml` | `LAB_RISK_` |
+| Transaction costs | `configs/costs.yaml` | `LAB_COST_` |
+| Experiment | `configs/experiment.yaml` | `LAB_EXPERIMENT_` |
+
+Costs are configuration rather than a constant because they decide whether a
+strategy looks viable. The defaults are pessimistic on purpose, and a model with
+zero spread *and* zero slippage is rejected at construction.
+
+Experiment settings are hashed into the experiment record, so changing one is
+visible:
+
+```bash
+LAB_EXPERIMENT_MAX_NAMES=100 make experiment-baseline
+```
+
+That is a **different experiment**, not the same one with more data — the config
+hash changes, and so does the experiment id.
+
 ## Changing the risk limits
 
 The risk numbers are configuration, not code. They resolve in three layers, each
@@ -117,6 +145,7 @@ The shipped values are conservative placeholders. Replace them with your own in
 | `make test` | Run the test suite |
 | `make schemas` | Regenerate `schemas/*.schema.json` from the models |
 | `make check` | Lint and test — everything CI would run |
+| `make experiment-baseline` | Run the baseline experiment (refuses until real data is ingested) |
 
 ## Using the contracts
 
