@@ -19,6 +19,7 @@ from lab.evaluation.metrics import (
     summarise,
     turnover,
 )
+from lab.evaluation.portfolio import Period, returns_and_turnovers, simulate
 from lab.evaluation.splits import (
     DatedFold,
     Fold,
@@ -31,11 +32,14 @@ __all__ = [
     "DatedFold",
     "Fold",
     "PerformanceSummary",
+    "Period",
     "RankIC",
     "WalkForwardConfig",
     "equity_curve",
     "max_drawdown",
     "rank_ic",
+    "returns_and_turnovers",
+    "simulate",
     "spearman",
     "summarise",
     "to_dated_folds",

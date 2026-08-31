@@ -58,9 +58,10 @@ review comments.
 | Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ✅ Shipped | 0.2 | Top-N by 12-1 momentum, equally weighted |
 | Configurable rebalance frequency | ✅ Shipped | 0.2 | Monthly default, weekly, daily; derived from observed sessions |
-| Transaction cost model | ✅ Shipped | 0.2 | Conservative by default; a zero-cost model is rejected at construction |
+| Configurable experiment settings | ✅ Shipped | 0.2 | Universe size, horizon, top-N and walk-forward geometry, all hashed into the record |
+| Transaction cost model | ✅ Shipped | 0.2 | Configurable in `configs/costs.yaml`; a zero-cost model is rejected |
 | Regularized linear model | ✅ Shipped | 0.2 | Ridge, fitted per fold; incomplete rows dropped, never imputed |
-| One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
+| One-command baseline run | 🟡 Partial | 0.2 | `make experiment-baseline`; refuses until real data lands (task 13) |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
 
 ## 4. Risk and execution

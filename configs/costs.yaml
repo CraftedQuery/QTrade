@@ -1,0 +1,30 @@
+# Transaction cost model.
+#
+# Costs decide whether a strategy looks viable, so they are configuration, not a
+# constant buried in code. Edit this file, or override per run with LAB_COST_*.
+#
+# Precedence: built-in defaults  <  this file  <  LAB_COST_* environment vars
+#
+# The defaults are conservative ON PURPOSE. Alpaca charges no commission on U.S.
+# equities, and modelling zero cost would be defensible on paper and wrong in
+# spirit: it hides the spread and the impact of trading, which are real whatever
+# the commission schedule says. A model with zero spread AND zero slippage is
+# rejected at construction, because it produces flattering results by definition.
+
+costs:
+  model_id: conservative_v1
+
+  # Basis points paid crossing the bid-ask, per side. Liquid U.S. large caps
+  # quote inside a basis point or two; 3 is pessimistic deliberately, and
+  # pessimistic is the correct direction to be wrong in.
+  half_spread_bps: 3
+
+  # Basis points of price impact per side, above the spread.
+  slippage_bps: 2
+
+  # Alpaca charges nothing on equities. A small per-share figure is kept so a
+  # high-turnover strategy cannot appear free.
+  commission_per_share: 0.005
+
+  # Floor applied per order. Zero for a commission-free broker.
+  min_commission_per_order: 0

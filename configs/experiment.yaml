@@ -1,0 +1,36 @@
+# Baseline experiment settings.
+#
+# Everything a result depends on lives here, so it can be hashed into the
+# experiment record. Two runs with the same hash on the same commit must
+# reproduce. Changing any value below changes the hash, which is the point.
+#
+# Precedence: built-in defaults  <  this file  <  LAB_EXPERIMENT_* env vars
+
+experiment:
+  universe_id: liquid50_v1
+
+  # 50 names to start, per docs/01_solo_agent_build.md. Raising this to 100 is a
+  # config change rather than a code change - but it is a different experiment,
+  # not the same one with more data.
+  max_names: 50
+
+  benchmark_symbol: SPY
+  feature_set: momentum_v1
+
+  # Sessions a label looks forward. Matched to the monthly rebalance.
+  label_horizon_sessions: 21
+
+  # monthly | weekly | daily
+  rebalance: monthly
+
+  # Names the momentum strategy holds.
+  top_n: 10
+
+  # L2 regularization strength for the ridge baseline.
+  ridge_alpha: 1.0
+
+  # Walk-forward geometry, in trading sessions.
+  min_train_size: 252
+  test_size: 63
+  purge: 0
+  embargo: 5

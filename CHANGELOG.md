@@ -78,6 +78,18 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
   reach the evaluator through any chain of imports. Unsealing stamps the
   experiment and returns a new record; a second evaluation raises.
 - 61 tests across costs, metrics and holdout isolation.
+- `lab.experiments.baseline` — the baseline experiment runner and
+  `make experiment-baseline`. Registers the `Experiment` before computing
+  anything, runs walk-forward folds, and reports a comparator table net of costs.
+  It never reads the holdout, and the import-graph test covers it.
+- `lab.evaluation.portfolio` — portfolio simulation, pricing weights through the
+  same `BarWindow` the features use so a decision cannot see the price that
+  settles it.
+- Costs and experiment settings are now configuration (`configs/costs.yaml`,
+  `configs/experiment.yaml`, `LAB_COST_*`, `LAB_EXPERIMENT_*`). Raising the
+  universe to 100 names changes the config hash, making it a different
+  experiment rather than the same one with more data.
+- 24 tests for the runner. 864 pass in total.
 
 ### Added (earlier in Unreleased)
 - `docs/04_release_02_plan.md` — the Release 0.2 task breakdown (13 tasks across

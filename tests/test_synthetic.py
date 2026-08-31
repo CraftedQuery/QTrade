@@ -6,6 +6,7 @@ quietly weaken every integrity test in the release.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import subprocess
 import sys
@@ -231,13 +232,24 @@ def test_a_delisted_instrument_records_its_last_day() -> None:
 
 
 def test_the_lab_package_never_imports_the_generator() -> None:
-    """Synthetic prices must not be able to reach a real experiment."""
-    offenders = [
-        path.relative_to(REPO_ROOT)
-        for path in (REPO_ROOT / "src" / "lab").rglob("*.py")
-        if "synthetic" in path.read_text(encoding="utf-8")
-    ]
-    assert not offenders, f"lab code references the synthetic generator: {offenders}"
+    """Synthetic prices must not be able to reach a real experiment.
+
+    Checks the actual import statements rather than the file text: lab code is
+    free to *mention* synthetic data in a docstring — the runner's refusal
+    message does exactly that — but must never import the generator.
+    """
+    offenders: list[str] = []
+    for path in (REPO_ROOT / "src" / "lab").rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            imported: list[str] = []
+            if isinstance(node, ast.Import):
+                imported = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                imported = [node.module or ""]
+            if any(name.split(".")[0] in {"tests", "synthetic"} for name in imported):
+                offenders.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}")
+    assert not offenders, f"lab code imports test fixtures: {offenders}"
 
 
 def test_the_generator_is_not_shipped_in_the_package() -> None:

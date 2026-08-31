@@ -45,7 +45,7 @@ Build the pipeline first. Plug the real data in at the end.
 | 9 | Cost model `conservative_v1` | C | ✅ Done | |
 | 10 | Metrics: rank IC, turnover, drawdown, net of cost | C | ✅ Done | |
 | 11 | Holdout evaluation isolated from training | C | ✅ Done | **#3** |
-| 12 | Experiment runner + `make experiment-baseline` | C | ⬜ Not started | **#6** |
+| 12 | Experiment runner + `make experiment-baseline` | C | ✅ Done | **#6** |
 | 13 | Alpaca historical bar adapter, 50 liquid names | D | ⬜ Not started | |
 
 Status values: ⬜ Not started · 🟡 In progress · ✅ Done · ⛔ Blocked
@@ -63,6 +63,10 @@ record any change here with its date.
 | D2 | Add `pandas`, `numpy`, `pyarrow`, `duckdb`, `scikit-learn` | Needed for tasks 1–10. Roughly triples the dependency surface; accepted deliberately, not by drift. |
 | D3 | **Derive trading sessions from observed bars.** No calendar library | Purge and embargo in trading days vs calendar days differ materially. Deriving avoids a wrong-calendar bug class and adds no dependency. Revisit if a gap turns out to matter. |
 | D4 | Rebalance **monthly (default), weekly, and daily** — configurable | Monthly is standard for momentum and keeps turnover from eating the edge before it can be measured. Weekly and daily are supported so the cost/turnover tradeoff can be measured rather than assumed. |
+| D6 | **Cost parameters are configuration**, defaults 3 bps half-spread + 2 bps slippage + $0.005/share | Costs decide whether a strategy looks viable, so they belong in a file the owner can change, not a constant in code. Owner-approved 2026-08-31. |
+| D7 | **Rank IC headline is per-date, then averaged** | Standard, and honest about time variation. Pooled is still reported beside it. Owner-approved 2026-08-31. |
+| D8 | **Universe: top 50 by trailing dollar volume, benchmark SPY** | `max_names` is configurable; raising it to 100 later is a config change that changes the config hash. Owner-approved 2026-08-31. |
+| D9 | **Label horizon 21 sessions** | Matches the monthly rebalance. Owner-approved 2026-08-31. |
 | D5 | **Defer MLflow to Release 0.3** | The append-only `Experiment` and `Prediction` records already give provenance and reproducibility. Standing up a tracking service now adds surface without answering a question we have. |
 
 ### Still open
@@ -334,8 +338,6 @@ informed by the first.
 
 #### 12. Experiment runner — closes acceptance #6
 
-> Next up.
-
 `make experiment-baseline` / `uv run python -m lab.experiments.baseline`.
 Registers the `Experiment` **before** any result is computed, runs the folds,
 stores predictions, and emits the comparator table.
@@ -344,6 +346,26 @@ stores predictions, and emits the comparator table.
 clean machine; the experiment record exists before any number is produced;
 re-running with the same config and seed reproduces the same results and the same
 `config_hash`.
+
+**Resolved as built:** `register()` takes only configuration and the session
+calendar — no results — so the ordering is structural rather than a convention:
+the record cannot be built *from* results because results are not among its
+inputs. A test calls `register()` on its own to prove that.
+
+The runner never reads the holdout, and the same import-graph test from task 11
+now covers `lab.experiments.baseline` too. A test also parses the runner's AST
+and asserts it contains no tuning or search calls: a poor result is the finding.
+
+`make experiment-baseline` currently **exits 1 with an explanation** rather than
+running. No market data has been ingested, and running the baseline on synthetic
+prices would emit a number that means nothing while looking exactly like a real
+result. It starts working when task 13 lands. Acceptance #6 is therefore closed
+in machinery, and completes in substance with the Alpaca adapter.
+
+Costs and experiment settings are configurable (`configs/costs.yaml`,
+`configs/experiment.yaml`, `LAB_COST_*`, `LAB_EXPERIMENT_*`), so raising the
+universe to 100 names is a config change — and it changes the config hash, which
+makes it a different experiment rather than the same one with more data.
 
 ### Phase D — real data
 
@@ -374,7 +396,7 @@ contain planted leaks that real data cannot.
 | 3 | Holdout evaluation separate from training code | ⬜ | ✅ **Closed** (task 11) |
 | 4 | LLM outage degrades to quant-only | ⬜ | ⬜ — 0.4 |
 | 5 | `.env` absent from git | ✅ | ✅ |
-| 6 | `pytest` and a baseline run on a clean machine | 🟡 Tests only | ✅ (task 12) |
+| 6 | `pytest` and a baseline run on a clean machine | 🟡 Tests only | 🟡 Machinery done (task 12); completes with real data (task 13) |
 
 ---
 
@@ -428,14 +450,9 @@ the first point at which a real result becomes possible.
   placeholders flagged `owner_approved: false`. Not blocking in 0.2; it stops
   being harmless when Release 0.3 lands.
 - **Alpaca paper credentials** — needed for task 13 only.
-- **Cost parameters are my choice, not the owner's.** 3 bps half-spread, 2 bps
-  slippage, $0.005/share. These directly decide whether a strategy looks viable,
-  so they deserve an explicit owner decision before any real result is reported.
-- **Rank IC convention** — both are computed and reported. Which one is the
-  headline number in the freeze report is still open; per-date is the standard
-  and the recommendation.
-- **Universe membership rule for task 13** — which 50 names, or what rule
-  selects them, and which symbol is the benchmark.
+- **The candidate universe list for task 13.** The *rule* is settled (top 50 by
+  trailing dollar volume, benchmark SPY); the candidate pool it screens from is
+  not. Alpaca's tradable-asset list is the obvious source.
 
 ## Resuming a session
 

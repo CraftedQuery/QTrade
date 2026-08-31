@@ -36,13 +36,16 @@ import json
 import os
 from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, Self
+from types import UnionType
+from typing import Annotated, Any, Self, get_args, get_origin
 
 import yaml
 from pydantic import Field, ValidationError, model_validator
 
 from lab.contracts.base import LabModel, Weight
+from lab.costs import CostModel
 
 REPO_ROOT: Path = Path(__file__).resolve().parents[2]
 DEFAULT_RISK_CONFIG_PATH: Path = REPO_ROOT / "configs" / "risk.yaml"
@@ -149,52 +152,92 @@ _BOOL_TRUE = {"1", "true", "yes", "on"}
 _BOOL_FALSE = {"0", "false", "no", "off"}
 
 
-def _coerce_env_value(field: str, raw: str) -> Any:
+def _scalar_type(annotation: Any) -> Any:
+    """Unwrap ``Annotated[...]`` and ``X | None`` down to the underlying scalar.
+
+    Field types in the contracts are aliases such as ``Weight`` and
+    ``Identifier``, so the raw annotation is rarely the type a value must be
+    coerced to.
+    """
+    while (args := get_args(annotation)) and get_origin(annotation) in (Annotated, UnionType):
+        annotation = args[0]
+    return annotation
+
+
+def _coerce(field: str, raw: str, annotation: Any, prefix: str) -> Any:
     """Convert one environment string to the type its field expects."""
-    if field == "owner_approved":
+    label = f"{prefix}{field.upper()}"
+    annotation = _scalar_type(annotation)
+
+    if annotation is bool:
         lowered = raw.strip().lower()
         if lowered in _BOOL_TRUE:
             return True
         if lowered in _BOOL_FALSE:
             return False
-        raise ValueError(f"{ENV_PREFIX}{field.upper()}: expected a boolean, got {raw!r}")
-    if field == "max_positions":
+        raise ValueError(f"{label}: expected a boolean, got {raw!r}")
+    if annotation is int:
         try:
             return int(raw)
         except ValueError as exc:
-            raise ValueError(
-                f"{ENV_PREFIX}{field.upper()}: expected an integer, got {raw!r}"
-            ) from exc
+            raise ValueError(f"{label}: expected an integer, got {raw!r}") from exc
+    if annotation is str or (isinstance(annotation, type) and issubclass(annotation, StrEnum)):
+        return raw.strip()
     try:
         return Decimal(raw)
     except InvalidOperation as exc:
-        raise ValueError(f"{ENV_PREFIX}{field.upper()}: expected a number, got {raw!r}") from exc
+        raise ValueError(f"{label}: expected a number, got {raw!r}") from exc
 
 
-def _read_yaml(path: Path) -> dict[str, Any]:
-    """Read the ``risk:`` block from a YAML config file."""
+def _read_yaml(path: Path, section: str, model: type[LabModel]) -> dict[str, Any]:
+    """Read one named block from a YAML config file."""
     loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
     if loaded is None:
         return {}
     if not isinstance(loaded, dict):
         raise ValueError(f"{path}: expected a mapping at the top level")
-    risk = loaded.get("risk", loaded)
-    if not isinstance(risk, dict):
-        raise ValueError(f"{path}: expected a mapping under 'risk'")
-    unknown = set(risk) - set(RiskLimits.model_fields)
+    block = loaded.get(section, loaded)
+    if not isinstance(block, dict):
+        raise ValueError(f"{path}: expected a mapping under {section!r}")
+    unknown = set(block) - set(model.model_fields)
     if unknown:
-        raise ValueError(f"{path}: unknown risk settings {sorted(unknown)}")
-    return {key: value for key, value in risk.items() if value is not None}
+        raise ValueError(f"{path}: unknown {section} settings {sorted(unknown)}")
+    return {key: value for key, value in block.items() if value is not None}
 
 
-def _read_env(env: Mapping[str, str]) -> dict[str, Any]:
-    """Collect ``LAB_RISK_*`` overrides from the environment."""
+def _read_env(env: Mapping[str, str], prefix: str, model: type[LabModel]) -> dict[str, Any]:
+    """Collect ``<PREFIX>*`` overrides from the environment."""
     overrides: dict[str, Any] = {}
-    for field in RiskLimits.model_fields:
-        raw = env.get(f"{ENV_PREFIX}{field.upper()}")
+    for field, info in model.model_fields.items():
+        raw = env.get(f"{prefix}{field.upper()}")
         if raw is not None and raw.strip() != "":
-            overrides[field] = _coerce_env_value(field, raw)
+            overrides[field] = _coerce(field, raw, info.annotation, prefix)
     return overrides
+
+
+def _resolve[M: LabModel](
+    model: type[M],
+    defaults: Mapping[str, Any],
+    path: Path,
+    section: str,
+    prefix: str,
+    env: Mapping[str, str] | None,
+    label: str,
+) -> M:
+    """Resolve settings from built-in defaults, then file, then environment.
+
+    Every layered setting in the lab goes through here, so the precedence rule is
+    stated once: later layers win, a missing file is not an error, and an unknown
+    key fails loudly rather than leaving a setting silently at its default.
+    """
+    resolved: dict[str, Any] = dict(defaults)
+    if path.is_file():
+        resolved.update(_read_yaml(path, section, model))
+    resolved.update(_read_env(os.environ if env is None else env, prefix, model))
+    try:
+        return model(**resolved)
+    except ValidationError as exc:
+        raise ValueError(f"invalid {label}: {exc}") from exc
 
 
 def load_risk_limits(
@@ -216,24 +259,150 @@ def load_risk_limits(
         ValueError: If a value cannot be parsed, an unknown setting appears, or
             the resulting limits contradict each other.
     """
-    config_path = DEFAULT_RISK_CONFIG_PATH if path is None else path
-    resolved: dict[str, Any] = dict(PROVISIONAL_DEFAULTS)
+    return _resolve(
+        RiskLimits,
+        PROVISIONAL_DEFAULTS,
+        DEFAULT_RISK_CONFIG_PATH if path is None else path,
+        "risk",
+        ENV_PREFIX,
+        env,
+        "risk limits",
+    )
 
-    if config_path.is_file():
-        resolved.update(_read_yaml(config_path))
-    resolved.update(_read_env(os.environ if env is None else env))
 
-    try:
-        return RiskLimits(**resolved)
-    except ValidationError as exc:
-        raise ValueError(f"invalid risk limits: {exc}") from exc
+COST_ENV_PREFIX = "LAB_COST_"
+DEFAULT_COST_CONFIG_PATH: Path = REPO_ROOT / "configs" / "costs.yaml"
+
+COST_DEFAULTS: Mapping[str, Any] = {
+    "model_id": "conservative_v1",
+    "half_spread_bps": Decimal("3"),
+    "slippage_bps": Decimal("2"),
+    "commission_per_share": Decimal("0.005"),
+    "min_commission_per_order": Decimal("0"),
+}
+"""Conservative defaults. See :mod:`lab.costs` for why they are not zero."""
+
+
+def load_cost_model(
+    path: Path | None = None,
+    env: Mapping[str, str] | None = None,
+) -> CostModel:
+    """Resolve the transaction cost model from defaults, file, then environment.
+
+    Costs decide whether a strategy looks viable, so they are configuration
+    rather than a constant. The layering matches the risk limits:
+    ``configs/costs.yaml`` beats the defaults, and ``LAB_COST_*`` beats the file.
+
+    Raises:
+        ValueError: If a value cannot be parsed, an unknown setting appears, or
+            the model charges nothing for trading.
+    """
+    return _resolve(
+        CostModel,
+        COST_DEFAULTS,
+        DEFAULT_COST_CONFIG_PATH if path is None else path,
+        "costs",
+        COST_ENV_PREFIX,
+        env,
+        "cost model",
+    )
+
+
+EXPERIMENT_ENV_PREFIX = "LAB_EXPERIMENT_"
+DEFAULT_EXPERIMENT_CONFIG_PATH: Path = REPO_ROOT / "configs" / "experiment.yaml"
+
+
+class ExperimentConfig(LabModel):
+    """Settings for the baseline experiment.
+
+    Everything a result depends on lives here so it can be hashed into the
+    experiment record. Two runs with the same hash, on the same commit, must
+    reproduce.
+    """
+
+    universe_id: str = Field(description="Universe definition identifier.")
+    max_names: int = Field(
+        ge=1,
+        description="Largest universe size. Starts at 50; raising it changes the result.",
+    )
+    benchmark_symbol: str = Field(description="Single instrument the benchmark baseline holds.")
+    feature_set: str = Field(description="Feature set name.")
+    label_horizon_sessions: int = Field(ge=1, description="Sessions a label looks forward.")
+    rebalance: str = Field(description="monthly, weekly or daily.")
+    top_n: int = Field(ge=1, description="Names the momentum strategy holds.")
+    ridge_alpha: Decimal = Field(gt=0, description="L2 regularization strength.")
+    min_train_size: int = Field(ge=1, description="Sessions of training required per fold.")
+    test_size: int = Field(ge=1, description="Sessions per test fold.")
+    purge: int = Field(ge=0, description="Extra sessions purged beyond the label horizon.")
+    embargo: int = Field(ge=0, description="Sessions withheld after each test fold.")
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if self.rebalance not in {"monthly", "weekly", "daily"}:
+            raise ValueError(f"rebalance must be monthly, weekly or daily; got {self.rebalance!r}")
+        if self.top_n > self.max_names:
+            raise ValueError(
+                f"top_n ({self.top_n}) exceeds max_names ({self.max_names}); the "
+                "strategy could never hold that many names"
+            )
+        return self
+
+    @property
+    def config_hash(self) -> str:
+        """Deterministic hash of the settings, stamped onto the experiment record."""
+        canonical = json.dumps(self.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(canonical.encode()).hexdigest()[:16]
+
+
+EXPERIMENT_DEFAULTS: Mapping[str, Any] = {
+    "universe_id": "liquid50_v1",
+    # 50 to start, per the build plan. Raising this to 100 is a config change,
+    # not a code change - but it changes the result, so it changes the hash.
+    "max_names": 50,
+    "benchmark_symbol": "SPY",
+    "feature_set": "momentum_v1",
+    "label_horizon_sessions": 21,
+    "rebalance": "monthly",
+    "top_n": 10,
+    "ridge_alpha": Decimal("1.0"),
+    "min_train_size": 252,
+    "test_size": 63,
+    "purge": 0,
+    "embargo": 5,
+}
+"""Baseline experiment defaults."""
+
+
+def load_experiment_config(
+    path: Path | None = None,
+    env: Mapping[str, str] | None = None,
+) -> ExperimentConfig:
+    """Resolve the experiment configuration from defaults, file, then environment."""
+    return _resolve(
+        ExperimentConfig,
+        EXPERIMENT_DEFAULTS,
+        DEFAULT_EXPERIMENT_CONFIG_PATH if path is None else path,
+        "experiment",
+        EXPERIMENT_ENV_PREFIX,
+        env,
+        "experiment config",
+    )
 
 
 __all__ = [
+    "COST_DEFAULTS",
+    "COST_ENV_PREFIX",
+    "DEFAULT_COST_CONFIG_PATH",
+    "DEFAULT_EXPERIMENT_CONFIG_PATH",
     "DEFAULT_RISK_CONFIG_PATH",
     "ENV_PREFIX",
+    "EXPERIMENT_DEFAULTS",
+    "EXPERIMENT_ENV_PREFIX",
     "PROVISIONAL_DEFAULTS",
     "REPO_ROOT",
+    "ExperimentConfig",
     "RiskLimits",
+    "load_cost_model",
+    "load_experiment_config",
     "load_risk_limits",
 ]
