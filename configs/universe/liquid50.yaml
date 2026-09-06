@@ -1,0 +1,69 @@
+# Dated liquid-U.S. roster used by the Release 0.2 baseline.
+#
+# This is NOT a point-in-time membership tape. The names were chosen because
+# they are liquid today; listed_on / delisted_on are applied, but names that
+# failed before the roster was chosen are absent. Every membership query
+# raises a survivorship warning. Do not treat yfinance-style current
+# membership as point-in-time either.
+#
+# Listing dates are public exchange/IPO dates, recorded so membership can be
+# answered as of a past day. GEHC lists during the sample so membership is
+# not a constant 50.
+
+universe:
+  id: liquid50_v1
+  source: committed-fixture
+  point_in_time: false
+  max_names: 50
+  benchmark_symbol: SPY
+  instruments:
+    - {symbol: SPY, name: SPDR S&P 500 ETF Trust, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1993-01-22}
+    - {symbol: QQQ, name: Invesco QQQ Trust, asset_class: us_etf, exchange: NASDAQ, listed_on: 1999-03-10}
+    - {symbol: IWM, name: iShares Russell 2000 ETF, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 2000-05-26}
+    - {symbol: DIA, name: SPDR Dow Jones Industrial Average ETF, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1998-01-20}
+    - {symbol: XLF, name: Financial Select Sector SPDR, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1998-12-22}
+    - {symbol: XLK, name: Technology Select Sector SPDR, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1998-12-22}
+    - {symbol: XLE, name: Energy Select Sector SPDR, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1998-12-22}
+    - {symbol: XLV, name: Health Care Select Sector SPDR, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1998-12-22}
+    - {symbol: AAPL, name: Apple Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1980-12-12}
+    - {symbol: MSFT, name: Microsoft Corporation, asset_class: us_equity, exchange: NASDAQ, listed_on: 1986-03-13}
+    - {symbol: AMZN, name: Amazon.com Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1997-05-15}
+    - {symbol: GOOGL, name: Alphabet Inc. Class A, asset_class: us_equity, exchange: NASDAQ, listed_on: 2004-08-19}
+    - {symbol: META, name: Meta Platforms Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 2012-05-18}
+    - {symbol: NVDA, name: NVIDIA Corporation, asset_class: us_equity, exchange: NASDAQ, listed_on: 1999-01-22}
+    - {symbol: TSLA, name: Tesla Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 2010-06-29}
+    - {symbol: JPM, name: JPMorgan Chase & Co., asset_class: us_equity, exchange: NYSE, listed_on: 1969-03-05}
+    - {symbol: JNJ, name: Johnson & Johnson, asset_class: us_equity, exchange: NYSE, listed_on: 1944-09-25}
+    - {symbol: V, name: Visa Inc., asset_class: us_equity, exchange: NYSE, listed_on: 2008-03-19}
+    - {symbol: UNH, name: UnitedHealth Group Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1984-10-17}
+    - {symbol: XOM, name: Exxon Mobil Corporation, asset_class: us_equity, exchange: NYSE, listed_on: 1972-01-01}
+    - {symbol: PG, name: Procter & Gamble Co., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: HD, name: Home Depot Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1981-09-22}
+    - {symbol: MA, name: Mastercard Inc., asset_class: us_equity, exchange: NYSE, listed_on: 2006-05-25}
+    - {symbol: CVX, name: Chevron Corporation, asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: ABBV, name: AbbVie Inc., asset_class: us_equity, exchange: NYSE, listed_on: 2013-01-02}
+    - {symbol: KO, name: Coca-Cola Co., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: PEP, name: PepsiCo Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1978-01-03}
+    - {symbol: COST, name: Costco Wholesale Corporation, asset_class: us_equity, exchange: NASDAQ, listed_on: 1985-12-05}
+    - {symbol: AVGO, name: Broadcom Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 2009-08-06}
+    - {symbol: WMT, name: Walmart Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1972-08-25}
+    - {symbol: MRK, name: Merck & Co. Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: BAC, name: Bank of America Corporation, asset_class: us_equity, exchange: NYSE, listed_on: 1978-01-03}
+    - {symbol: LLY, name: Eli Lilly and Co., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: ADBE, name: Adobe Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1986-08-20}
+    - {symbol: CRM, name: Salesforce Inc., asset_class: us_equity, exchange: NYSE, listed_on: 2004-06-23}
+    - {symbol: ORCL, name: Oracle Corporation, asset_class: us_equity, exchange: NYSE, listed_on: 1986-03-12}
+    - {symbol: CSCO, name: Cisco Systems Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1990-02-16}
+    - {symbol: MCD, name: McDonald's Corporation, asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: NKE, name: Nike Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1980-12-02}
+    - {symbol: DIS, name: Walt Disney Co., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: AMD, name: Advanced Micro Devices Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1972-09-27}
+    - {symbol: INTC, name: Intel Corporation, asset_class: us_equity, exchange: NASDAQ, listed_on: 1971-10-13}
+    - {symbol: PFE, name: Pfizer Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: T, name: AT&T Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1984-02-16}
+    - {symbol: VZ, name: Verizon Communications Inc., asset_class: us_equity, exchange: NYSE, listed_on: 2000-06-30}
+    - {symbol: NFLX, name: Netflix Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 2002-05-23}
+    - {symbol: QCOM, name: QUALCOMM Inc., asset_class: us_equity, exchange: NASDAQ, listed_on: 1991-12-13}
+    - {symbol: IBM, name: International Business Machines, asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: CAT, name: Caterpillar Inc., asset_class: us_equity, exchange: NYSE, listed_on: 1970-01-02}
+    - {symbol: GEHC, name: GE HealthCare Technologies, asset_class: us_equity, exchange: NASDAQ, listed_on: 2023-01-04}

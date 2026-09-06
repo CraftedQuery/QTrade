@@ -6,7 +6,7 @@ less.
 
 ## Release 0.1 — Repo skeleton and data contracts ✅
 
-*Weeks 1–2. Current release.*
+*Weeks 1–2.*
 
 The nine records the system exchanges, with the research and safety rules
 enforced in their types rather than left to review.
@@ -21,21 +21,28 @@ enforced in their types rather than left to review.
 
 **Done when:** `make check` passes on a clean clone.
 
-## Release 0.2 — Data and baseline ⬜
+## Release 0.2 — Data and baseline ✅
 
-*Weeks 3–4.*
+*Weeks 3–4. Current release.*
 
-- Licensed historical bars for ~50 liquid names
-- Dated universe with membership by date
-- Explicit information cutoff computed on every feature
-- Walk-forward splits with purge and embargo, in code
+- Dated 50-name universe with membership by date (`members_on`)
+- Historical bars: committed fixture generator by default; optional Alpaca
+  Market Data when paper keys are present
+- Explicit information cutoff computed on every momentum snapshot
+- Walk-forward splits with purge and embargo, applied in
+  `lab.experiments.splits`
 - Baselines: momentum vs. equal weight vs. cash vs. SPY
-- One command reproduces the baseline from raw inputs
+- One command: `make experiment-baseline`
 
-**Done when:** the baseline runs end to end on a clean machine and the
-look-ahead tests pass against real features.
+**Done when:** the baseline runs from committed fixtures on a clean machine,
+look-ahead tests pass against computed features, and holdout evaluation lives
+in a separate module from training.
 
-**Explicitly not in 0.2:** news, LLM calls, any broker connection.
+**Explicitly not in 0.2:** news, LLM calls, broker orders, dashboard,
+regularized linear, MLflow, Parquet/DuckDB.
+
+**Known gap:** the liquid-50 roster is a current-name list with listing dates
+applied, not a point-in-time membership tape. Membership queries warn.
 
 ## Release 0.3 — Paper execution and risk ⬜
 
@@ -109,11 +116,11 @@ Tracked across releases. These are the checks that keep results believable.
 | # | Test | Status |
 |---|---|---|
 | 1 | Replaying the same proposal cannot create a second broker order | 🟡 Contract-level (0.1) → end to end in 0.3 |
-| 2 | Features computed at *t* cannot read prices after *t* | 🟡 Contract-level (0.1) → end to end in 0.2 |
-| 3 | Holdout evaluation is separate from training code | ⬜ 0.2 |
+| 2 | Features computed at *t* cannot read prices after *t* | ✅ Shipped (0.2), computed features |
+| 3 | Holdout evaluation is separate from training code | ✅ Shipped (0.2) |
 | 4 | LLM outage degrades to quant-only; risk engine still runs | ⬜ 0.4 |
 | 5 | `.env` is absent from git | ✅ Shipped (0.1) |
-| 6 | `pytest` and a baseline experiment run on a clean machine from documented steps | 🟡 Tests ship in 0.1; baseline in 0.2 |
+| 6 | `pytest` and a baseline experiment run on a clean machine from documented steps | ✅ Shipped (0.2) |
 
 ## Keeping this documentation true
 

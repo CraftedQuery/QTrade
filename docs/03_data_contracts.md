@@ -64,7 +64,9 @@ information_cutoff <= as_of
 `as_of` is the moment a decision is being made. `information_cutoff` is the
 timestamp of the newest input that fed these values. Constructing a snapshot
 that violates this **raises**. This is the contract-level half of acceptance
-test #2; the computational half arrives with the feature pipeline in Weeks 3–4.
+test #2. The computational half is `lab.features.momentum.compute_momentum`:
+it filters bars by `information_time <= as_of` and stamps `information_cutoff`
+with the newest bar actually consumed. A future bar cannot change the value.
 
 ### `Experiment` — a registered experiment
 

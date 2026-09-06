@@ -10,11 +10,12 @@ product is an honest answer about whether a signal works — including the answe
 > authority over every order. No live brokerage credentials are ever requested,
 > stored, or used.
 
-## Status — Release 0.1: repo skeleton and data contracts
+## Status — Release 0.2: data and baseline
 
-The nine records the system exchanges are defined, with the research and safety
-rules enforced in their types rather than left to code review. The lab does not
-yet load market data, run an experiment, or connect to a broker.
+The lab loads a dated 50-name universe, computes momentum with an explicit
+information cutoff, and reproduces a walk-forward baseline (momentum vs. cash
+vs. SPY vs. equal weight) from committed fixtures. No broker orders, no LLM,
+no dashboard.
 
 See [`docs/user/02_features.md`](docs/user/02_features.md) for the status of
 every planned capability, and [`CHANGELOG.md`](CHANGELOG.md) for what landed.
@@ -22,8 +23,9 @@ every planned capability, and [`CHANGELOG.md`](CHANGELOG.md) for what landed.
 ## Quick start
 
 ```bash
-make install    # uv sync --extra dev
-make check      # ruff + pytest
+make install               # uv sync --extra dev
+make check                 # ruff + pytest
+make experiment-baseline   # momentum vs cash / SPY / equal weight
 ```
 
 Full instructions: [`docs/user/04_getting_started.md`](docs/user/04_getting_started.md).
@@ -74,12 +76,12 @@ backtest results:
 ## Layout
 
 ```
-configs/     Experiment and runtime configuration (not read until Release 0.2)
+configs/     Experiment, universe, and risk configuration
 docs/        Mandate, build plan, contract reference
 docs/user/   User-facing documentation
 schemas/     Generated JSON Schemas — never hand-edit
 src/lab/     The package
-tests/       Contract, schema-drift, and repo-hygiene tests
+tests/       Contract, look-ahead, split, holdout-isolation, and hygiene tests
 ```
 
 ## Commands
@@ -90,6 +92,7 @@ tests/       Contract, schema-drift, and repo-hygiene tests
 | `make lint` | `ruff check` and `ruff format --check` |
 | `make test` | Run the test suite |
 | `make schemas` | Regenerate `schemas/*.schema.json` from the models |
+| `make experiment-baseline` | Reproduce the 0.2 baseline from committed fixtures |
 | `make check` | Everything CI would run |
 
 ## Contributing
@@ -107,12 +110,10 @@ experiment and report the trial count.
 
 ## Next up
 
-**Release 0.2 — data and baseline.** Licensed historical bars for ~50 liquid
-names, a dated universe, walk-forward splits with purge and embargo, and a
-momentum baseline judged against cash, SPY, and equal weight.
-
-Risk limits are configurable in [`configs/risk.yaml`](configs/risk.yaml) and
-overridable with `LAB_RISK_*`, so Release 0.3 is no longer blocked on the owner
-mandate. The shipped values are conservative placeholders that report themselves
-as provisional until [`docs/00_owner_mandate.md`](docs/00_owner_mandate.md) §3 is
+**Release 0.3 — paper execution and risk.** Trade proposals from the baseline,
+deterministic limits, an Alpaca **paper** adapter, and conservative shadow
+fills. Risk limits are already configurable in
+[`configs/risk.yaml`](configs/risk.yaml) and overridable with `LAB_RISK_*`.
+The shipped values are conservative placeholders that report themselves as
+provisional until [`docs/00_owner_mandate.md`](docs/00_owner_mandate.md) §3 is
 completed and `owner_approved` is set.

@@ -46,7 +46,13 @@ def test_env_example_is_tracked_and_empty_of_values() -> None:
         if not stripped or stripped.startswith("#"):
             continue
         key, _, value = stripped.partition("=")
-        if key in {"ALPACA_PAPER_BASE_URL", "LAB_ENV", "LAB_DATA_DIR", "LAB_ARTIFACT_DIR"}:
+        if key in {
+            "ALPACA_PAPER_BASE_URL",
+            "ALPACA_DATA_BASE_URL",
+            "LAB_ENV",
+            "LAB_DATA_DIR",
+            "LAB_ARTIFACT_DIR",
+        }:
             continue
         assert value == "", f"{key} in .env.example must have no value"
 

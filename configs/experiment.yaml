@@ -1,0 +1,41 @@
+# Baseline experiment (Release 0.2).
+#
+# No secrets. Paper research only. These dates and costs are research-loop
+# settings, not owner-mandate risk numbers — do not copy them into
+# configs/risk.yaml.
+
+experiment:
+  name: momentum-vs-controls
+  hypothesis: >-
+    A 21-session cross-sectional momentum sleeve (long the top half,
+    equal-weight, long-or-cash) can be evaluated honestly against cash,
+    SPY, and equal weight under walk-forward splits with purge and embargo.
+    This run exists to prove the loop; it does not claim an edge.
+  feature_set: momentum_v1
+  feature_set_version: 1.0.0
+  universe_id: liquid50_v1
+  cost_model_id: conservative_v1
+  one_way_cost_bps: 10
+  lookback_sessions: 21
+  rebalance_every_sessions: 21
+  horizon_days: 21
+  trial_count: 1
+  train_start: 2022-08-01
+  train_end: 2023-03-01
+  validation_start: 2023-03-01
+  validation_end: 2023-08-01
+  holdout_start: 2023-08-01
+  holdout_end: 2024-01-01
+
+walk_forward:
+  # Applied computationally in lab.experiments.splits, then stored on the
+  # Experiment contract. Not comments-only.
+  purge: P21D
+  embargo: P5D
+
+fixture:
+  # Deterministic synthetic daily bars for offline runs. Same seed => same bars.
+  seed: 20260201
+  bar_start: 2022-06-01
+  bar_end: 2023-12-29
+  source: committed-fixture

@@ -31,7 +31,7 @@ env/
 htmlcov/
 
 # --- Lab data and artifacts (regenerated, never source of truth) ---
-data/
+/data/
 artifacts/
 mlruns/
 *.parquet

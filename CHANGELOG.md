@@ -7,29 +7,60 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-09-06
+
+Data and baseline (Weeks 3–4). Paper research only. No broker orders, no news,
+no LLM, no dashboard.
+
 ### Added
-- Configurable deterministic risk limits (`src/lab/config.py`, `configs/risk.yaml`).
-  Limits resolve from built-in defaults, then the config file, then `LAB_RISK_*`
-  environment variables, so the owner's numbers can be changed without touching
-  code. Incoherent combinations are rejected at load time.
-- `RiskLimits.config_hash` — a deterministic hash of the numeric limits, for
-  `RiskDecision.risk_config_hash`. Approving unchanged numbers does not change
-  the hash, so decisions stay comparable across that event.
-- `RiskLimits.is_provisional` — the lab can tell whether it is running on the
-  owner's real numbers or on placeholders.
-- `LAB_RISK_*` placeholders in `.env.example`.
-- 22 tests covering layering, coercion, invariants, and hashing.
+- Dated 50-name U.S. universe (`configs/universe/liquid50.yaml`) with
+  membership by date. `GEHC` lists during the sample so membership is not a
+  constant 50. The roster is **not** a point-in-time membership tape;
+  `SurvivorshipWarning` is raised on first query.
+- Deterministic synthetic daily bars from a committed fixture seed
+  (`lab.data.generate`). Offline baseline runs need no secrets.
+- Optional Alpaca Market Data historical fetch (`lab.data.alpaca`) when paper
+  keys are present. HTTPS to `data.alpaca.markets` only; the live trading host
+  is refused. Keys are never written to artifacts.
+- Walk-forward split generator (`lab.experiments.splits`) that applies purge
+  and embargo computationally, aligned with the `Experiment` contract.
+- Momentum feature computer (`lab.features.momentum`) that filters on
+  `Bar.information_time` and stamps `information_cutoff` with the newest
+  consumed bar.
+- Baselines: cash, SPY, equal weight, 21-session momentum (long the top half).
+  Reports rank IC, turnover, drawdown, and net-of-cost return. Every number
+  carries `trial_count`. Win rate is not computed.
+- Holdout evaluation isolated in `lab.experiments.holdout`. Training code does
+  not import it and cannot emit holdout metrics.
+- One command: `make experiment-baseline` /
+  `uv run python -m lab.experiments.baseline`.
+- Look-ahead tests against *computed* features (acceptance test #2).
+- Holdout-isolation tests (acceptance test #3).
+- Configurable deterministic risk limits (`src/lab/config.py`,
+  `configs/risk.yaml`) — already on main after 0.1.0; first tagged with 0.2.
+  The baseline does not read them.
 
 ### Changed
-- `docs/00_owner_mandate.md` §3 now maps each row to its `configs/risk.yaml` key
-  and shows the provisional default. Filling it in is no longer a hard blocker
-  for Release 0.3 — the lab runs on flagged placeholders until then.
-- Added `pyyaml` as a runtime dependency (needed to read `configs/risk.yaml`).
+- Package version `0.2.0`.
+- `.env.example` documents optional paper keys for historical bars.
+  Broker order placement remains Release 0.3.
 
 ### Security
-- Risk limits are read once at startup and are never mutable at runtime. A limit
-  that could move mid-session would make the audit trail meaningless, and no
-  model output may reach them: `RiskLimits` exposes no mutation method.
+- Default baseline path reads no credentials.
+- Alpaca client allow-lists the market-data host and refuses
+  `api.alpaca.markets`.
+- `.env` remains gitignored; fixture runs do not require it.
+
+### Known gaps
+- The liquid-50 list is a current-name roster with listing dates applied, not
+  a vendor PIT membership tape.
+- On the committed fixture seed, holdout net is cash 0 / SPY negative /
+  equal-weight ahead of momentum (~+0.023 vs ~+0.018); trial_count=1.
+  A finding, not a retune target.
+- Fixtures are synthetic, not redistributed vendor bars.
+- Regularized linear, MLflow, and Parquet/DuckDB were left out of this slice.
+- `docs/00_owner_mandate.md` still has no owner numbers. The baseline does not
+  invent them; it does not read `configs/risk.yaml`.
 
 ## [0.1.0] — 2026-08-30
 
@@ -91,5 +122,6 @@ schema drift, and repository hygiene.
 - Acceptance tests #1 and #2 hold at the contract level only; they become end to
   end in Releases 0.3 and 0.2 respectively.
 
-[Unreleased]: https://github.com/CraftedQuery/QTrade/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/CraftedQuery/QTrade/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/CraftedQuery/QTrade/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CraftedQuery/QTrade/releases/tag/v0.1.0

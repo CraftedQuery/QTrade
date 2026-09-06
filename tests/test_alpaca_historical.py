@@ -1,0 +1,175 @@
+"""Optional Alpaca historical fetch: host allow-list, no keys required for fixtures."""
+
+from __future__ import annotations
+
+import json
+from datetime import UTC, date, datetime
+from urllib.request import Request
+
+import pytest
+
+from lab.data.alpaca import ALLOWED_DATA_HOSTS, alpaca_keys_present, fetch_daily_bars
+from lab.data.calendar import weekdays
+
+
+class _FakeResponse:
+    def __init__(self, payload: dict[str, object]) -> None:
+        self._body = json.dumps(payload).encode("utf-8")
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self) -> _FakeResponse:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+
+def test_keys_absent_means_fixture_path_is_required() -> None:
+    assert not alpaca_keys_present({})
+    with pytest.raises(ValueError, match="committed offline run"):
+        fetch_daily_bars(["SPY"], date(2022, 1, 1), date(2022, 1, 10), env={})
+
+
+def test_live_trading_host_is_refused() -> None:
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+        "ALPACA_DATA_BASE_URL": "https://api.alpaca.markets",
+    }
+    with pytest.raises(ValueError, match="live trading host"):
+        fetch_daily_bars(["SPY"], date(2022, 1, 1), date(2022, 1, 10), env=env)
+
+
+def test_http_is_refused() -> None:
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+        "ALPACA_DATA_BASE_URL": "http://data.alpaca.markets",
+    }
+    with pytest.raises(ValueError, match="https"):
+        fetch_daily_bars(["SPY"], date(2022, 1, 1), date(2022, 1, 10), env=env)
+
+
+def test_fetch_parses_bars_and_does_not_echo_secrets() -> None:
+    captured: list[Request] = []
+
+    def opener(request: Request, timeout: float = 30) -> _FakeResponse:
+        captured.append(request)
+        return _FakeResponse(
+            {
+                "bars": {
+                    "SPY": [
+                        {
+                            "t": "2022-08-01T04:00:00Z",
+                            "o": 400.0,
+                            "h": 405.0,
+                            "l": 399.0,
+                            "c": 403.0,
+                            "v": 1000,
+                            "vw": 402.5,
+                            "n": 12,
+                        }
+                    ]
+                },
+                "next_page_token": None,
+            }
+        )
+
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+    }
+    bars = fetch_daily_bars(
+        ["SPY"],
+        date(2022, 8, 1),
+        date(2022, 8, 2),
+        env=env,
+        opener=opener,
+        ingested_at=datetime(2026, 9, 6, tzinfo=UTC),
+    )
+    assert len(bars) == 1
+    assert bars[0].symbol == "SPY"
+    assert bars[0].source == "alpaca-iex"
+    assert bars[0].information_time == bars[0].ts_end
+    url = captured[0].get_full_url()
+    assert url.startswith("https://data.alpaca.markets/")
+    host = url.split("/")[2]
+    assert host in ALLOWED_DATA_HOSTS
+    assert env["ALPACA_API_SECRET_KEY"] not in url
+    # Lab end 2022-08-02 is exclusive; Alpaca's end is inclusive → 2022-08-01.
+    assert "end=2022-08-01" in url
+    assert "end=2022-08-02" not in url
+
+
+def test_alpaca_window_matches_fixture_weekdays() -> None:
+    """Same [start, end) as generate_daily_bars: last fixture day is Alpaca's inclusive end."""
+    start, end = date(2022, 8, 1), date(2022, 8, 6)  # Mon-Sat; fixtures include Mon-Fri only
+    fixture_days = weekdays(start, end)
+    assert fixture_days == [
+        date(2022, 8, 1),
+        date(2022, 8, 2),
+        date(2022, 8, 3),
+        date(2022, 8, 4),
+        date(2022, 8, 5),
+    ]
+    captured: list[Request] = []
+
+    def opener(request: Request, timeout: float = 30) -> _FakeResponse:
+        captured.append(request)
+        return _FakeResponse(
+            {
+                "bars": {
+                    "SPY": [
+                        {
+                            "t": "2022-08-05T04:00:00Z",
+                            "o": 400.0,
+                            "h": 405.0,
+                            "l": 399.0,
+                            "c": 403.0,
+                            "v": 1000,
+                        },
+                        {
+                            "t": "2022-08-06T04:00:00Z",
+                            "o": 410.0,
+                            "h": 411.0,
+                            "l": 409.0,
+                            "c": 410.0,
+                            "v": 1000,
+                        },
+                    ]
+                },
+                "next_page_token": None,
+            }
+        )
+
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+    }
+    bars = fetch_daily_bars(["SPY"], start, end, env=env, opener=opener)
+    url = captured[0].get_full_url()
+    assert f"end={fixture_days[-1].isoformat()}" in url
+    assert f"end={end.isoformat()}" not in url
+    assert {bar.ts_start.date() for bar in bars} == {fixture_days[-1]}
+
+
+def test_empty_half_open_range_does_not_call_alpaca() -> None:
+    def opener(request: Request, timeout: float = 30) -> _FakeResponse:
+        raise AssertionError(f"should not request {request.get_full_url()}")
+
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+    }
+    assert (
+        fetch_daily_bars(
+            ["SPY"],
+            date(2022, 8, 1),
+            date(2022, 8, 1),
+            env=env,
+            opener=opener,
+        )
+        == []
+    )
