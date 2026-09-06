@@ -68,6 +68,10 @@ Every printed number includes `trial_count`. Rank IC, turnover, drawdown, and
 net-of-cost return are reported. Win rate is not. The liquid-50 roster is
 **not** a point-in-time membership tape; the run prints a survivorship warning.
 
+On this fixture seed, momentum holdout net (~+0.018) does not beat
+equal-weight (~+0.023); `trial_count=1`. That is a finding, not a retune
+target.
+
 This is acceptance test #6.
 
 ## Configure

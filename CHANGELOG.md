@@ -54,6 +54,9 @@ no LLM, no dashboard.
 ### Known gaps
 - The liquid-50 list is a current-name roster with listing dates applied, not
   a vendor PIT membership tape.
+- On this fixture seed, momentum holdout net (~+0.018) does not beat
+  equal-weight (~+0.023); trial_count=1. That is a finding, not a retune
+  target.
 - Fixtures are synthetic, not redistributed vendor bars.
 - Regularized linear, MLflow, and Parquet/DuckDB were left out of this slice.
 - `docs/00_owner_mandate.md` still has no owner numbers. The baseline does not

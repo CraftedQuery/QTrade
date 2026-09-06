@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable, Mapping, Sequence
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -77,7 +77,9 @@ def fetch_daily_bars(
     Args:
         symbols: Tickers to request.
         start: Inclusive calendar start.
-        end: Exclusive calendar end, matching the fixture generator.
+        end: Exclusive calendar end, matching ``generate_daily_bars`` /
+            ``weekdays`` (``[start, end)``). Converted to Alpaca's inclusive
+            ``end`` before the request so the last included day is ``end - 1``.
         env: Environment mapping. Defaults to ``os.environ``.
         opener: Injectable ``urlopen`` for tests.
         ingested_at: Provenance stamp. Defaults to now (UTC).
@@ -94,12 +96,16 @@ def fetch_daily_bars(
     key_id = mapping["ALPACA_API_KEY_ID"].strip()
     secret = mapping["ALPACA_API_SECRET_KEY"].strip()
     base = _data_base_url(mapping)
+    inclusive_end = _inclusive_alpaca_end(start, end)
+    if inclusive_end is None:
+        return []
     stamped = datetime.now(tz=UTC) if ingested_at is None else ingested_at
     fetch: Callable[..., Any] = opener if opener is not None else urlopen
     bars: list[Bar] = []
     page_token: str | None = None
-    # Alpaca's end is inclusive; the lab uses exclusive end dates.
-    alpaca_end = end.isoformat()
+    # Lab windows are half-open [start, end), same as the fixture generator.
+    # Alpaca's `end` query param is inclusive, so send the last included day.
+    alpaca_end = inclusive_end.isoformat()
     while True:
         params: dict[str, str] = {
             "symbols": ",".join(symbols),
@@ -132,7 +138,19 @@ def fetch_daily_bars(
         page_token = payload.get("next_page_token")
         if not page_token:
             break
-    return bars
+    # Drop any extra session on or after the exclusive lab end.
+    return [bar for bar in bars if bar.ts_start.date() < end]
+
+
+def _inclusive_alpaca_end(start: date, end: date) -> date | None:
+    """Last calendar day Alpaca should include for a lab ``[start, end)`` window.
+
+    Returns ``None`` when the half-open range is empty so we do not request
+    a day the fixture generator would omit.
+    """
+    if end <= start:
+        return None
+    return end - timedelta(days=1)
 
 
 def _bars_from_rows(symbol: str, rows: list[Any], ingested_at: datetime) -> list[Bar]:

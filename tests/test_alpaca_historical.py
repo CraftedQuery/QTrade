@@ -97,3 +97,26 @@ def test_fetch_parses_bars_and_does_not_echo_secrets() -> None:
     host = url.split("/")[2]
     assert host in ALLOWED_DATA_HOSTS
     assert env["ALPACA_API_SECRET_KEY"] not in url
+    # Lab end 2022-08-02 is exclusive; Alpaca's end is inclusive → 2022-08-01.
+    assert "end=2022-08-01" in url
+    assert "end=2022-08-02" not in url
+
+
+def test_empty_half_open_range_does_not_call_alpaca() -> None:
+    def opener(request: Request, timeout: float = 30) -> _FakeResponse:
+        raise AssertionError(f"should not request {request.get_full_url()}")
+
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+    }
+    assert (
+        fetch_daily_bars(
+            ["SPY"],
+            date(2022, 8, 1),
+            date(2022, 8, 1),
+            env=env,
+            opener=opener,
+        )
+        == []
+    )
