@@ -12,12 +12,13 @@ What this project is for, what it does today, and what is planned.
 
 ## Current state
 
-**Release 0.1 — repo skeleton and data contracts.**
+**Release 0.2 — data and baseline.**
 
-The lab does not yet load data, run an experiment, or place an order. Release
-0.1 defines the nine records the system will exchange and enforces the research
-and safety rules in their types. See [`02_features.md`](02_features.md) for the
-status of every planned capability.
+The lab loads a dated 50-name universe, computes momentum features with an
+explicit information cutoff, and reproduces a walk-forward baseline
+(momentum vs. cash vs. SPY vs. equal weight) from committed fixtures. It does
+not place an order, call an LLM, or open a dashboard. See
+[`02_features.md`](02_features.md) for the status of every planned capability.
 
 ## For contributors
 

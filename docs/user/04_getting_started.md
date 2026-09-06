@@ -2,9 +2,10 @@
 
 ## What you can run today
 
-Release 0.1 ships the data contracts and the checks that guard them. It does
-**not** yet load market data, run an experiment, or connect to a broker. You can
-install the project, run the test suite, and regenerate the JSON Schemas.
+Release 0.2 ships a dated 50-name universe, walk-forward splits with purge and
+embargo, and a baseline experiment: momentum vs. cash vs. SPY vs. equal
+weight. The default run uses committed fixtures and needs no secrets. It does
+**not** place broker orders, call an LLM, or open a dashboard.
 
 ## Requirements
 
@@ -42,7 +43,32 @@ make check
 ```
 
 That runs `ruff check`, `ruff format --check`, and `pytest`. Everything should
-pass on a clean clone. This is acceptance test #6 for the current release.
+pass on a clean clone.
+
+## Reproduce the baseline
+
+```bash
+make experiment-baseline
+```
+
+or:
+
+```bash
+uv run python -m lab.experiments.baseline
+```
+
+The command:
+
+1. registers an experiment **before** any metric is computed
+2. scores train and validation in `lab.experiments.train` (holdout stays sealed)
+3. scores the holdout in `lab.experiments.holdout` only
+4. writes JSON under `artifacts/experiments/<id>/`
+
+Every printed number includes `trial_count`. Rank IC, turnover, drawdown, and
+net-of-cost return are reported. Win rate is not. The liquid-50 roster is
+**not** a point-in-time membership tape; the run prints a survivorship warning.
+
+This is acceptance test #6.
 
 ## Configure
 
@@ -52,23 +78,31 @@ cp .env.example .env
 
 `.env` is gitignored and must never be committed.
 
-Leave the Alpaca variables empty for now — nothing reads them until Release 0.3.
-When you do fill them in, use **paper** credentials only. There is deliberately
-no live endpoint anywhere in this repository, and a test asserts it stays that
-way.
+Leave the Alpaca variables empty unless you want optional licensed historical
+bars. The default `--source fixture` path never reads them.
+
+```bash
+# optional, paper keys only — never required for make check or the fixture run
+uv run python -m lab.experiments.baseline --source alpaca
+```
+
+When you fill keys in, use **paper** credentials only. Historical bars go to
+`https://data.alpaca.markets`. There is deliberately no live trading endpoint
+anywhere in this repository, and a test asserts it stays that way.
 
 > **Never** paste keys into an agent prompt, a log, an issue, or a cloud VM.
 
 ## Changing the risk limits
 
-The risk numbers are configuration, not code. They resolve in three layers, each
-beating the one before:
+The risk numbers are configuration, not code. They resolve in three layers,
+each beating the one before:
 
 ```
 built-in defaults  <  configs/risk.yaml  <  LAB_RISK_* environment variables
 ```
 
-Edit the file for a lasting change:
+The baseline experiment does **not** read these limits. They exist for Release
+0.3. Edit the file for a lasting change:
 
 ```yaml
 # configs/risk.yaml
@@ -77,10 +111,10 @@ risk:
   max_gross_exposure: 0.50
 ```
 
-Or override for a single run:
+Or override for a single process:
 
 ```bash
-LAB_RISK_MAX_POSITION_WEIGHT=0.03 uv run python -m lab.experiments.baseline
+LAB_RISK_MAX_POSITION_WEIGHT=0.03 uv run python -c "from lab.config import load_risk_limits; print(load_risk_limits())"
 ```
 
 Read them from Python:
@@ -116,6 +150,7 @@ The shipped values are conservative placeholders. Replace them with your own in
 | `make lint` | `ruff check` and `ruff format --check` |
 | `make test` | Run the test suite |
 | `make schemas` | Regenerate `schemas/*.schema.json` from the models |
+| `make experiment-baseline` | Reproduce the 0.2 baseline from committed fixtures |
 | `make check` | Lint and test — everything CI would run |
 
 ## Using the contracts
@@ -145,19 +180,19 @@ FeatureSnapshot(..., information_cutoff=as_of + timedelta(seconds=1))
 # ValidationError: look-ahead: information_cutoff ... is after as_of ...
 ```
 
-That is the whole idea. The contracts refuse to represent the mistakes that are
-hardest to spot in results. See
-[`../03_data_contracts.md`](../03_data_contracts.md) for all nine.
+Computed features use the same rule. `compute_momentum(..., as_of=t)` ignores
+bars whose `information_time` is after `t`. See
+[`../03_data_contracts.md`](../03_data_contracts.md) for all nine contracts.
 
 ## Repository layout
 
 ```
-configs/     Experiment and runtime configuration (not read until 0.2)
+configs/     Experiment, universe, and risk configuration
 docs/        Mandate, build plan, contract reference
 docs/user/   This documentation
 schemas/     Generated JSON Schemas — never hand-edit
-src/lab/     The package
-tests/       Contract, schema-drift, and repo-hygiene tests
+src/lab/     The package (contracts, data, universe, features, experiments)
+tests/       Contract, look-ahead, split, holdout-isolation, and hygiene tests
 ```
 
 ## Troubleshooting
@@ -170,6 +205,10 @@ not regenerate. Run `make schemas` and commit the result.
 
 **Wrong Python version** — this project requires 3.12. `uv` reads
 `.python-version` and will fetch it; a manual venv will not.
+
+**`Alpaca keys are not set`** — you passed `--source alpaca` without paper keys.
+Use the default fixture path, or export `ALPACA_API_KEY_ID` and
+`ALPACA_API_SECRET_KEY`. Never commit `.env`.
 
 ## Next
 

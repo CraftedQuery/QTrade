@@ -117,6 +117,14 @@ price series. Mixing adjusted and raw series manufactures returns.
 
 **Universe** — the set of instruments eligible for trading on a given date.
 
+**Dated universe** — a roster that answers membership *as of a calendar day*
+via listing and delisting dates. Applying those dates to a list of names that
+are liquid *today* is still survivorship-biased and must be flagged.
+
+**Committed fixture** — deterministic synthetic bars generated from a seed
+checked into the repository. The default baseline run uses these so a clean
+clone needs no API keys. They are not vendor data.
+
 ## Project
 
 **Slice** — the current, narrow band of work an agent is permitted to build.

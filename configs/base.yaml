@@ -1,37 +1,9 @@
-# Base configuration for the AI Trading Lab.
+# Shared lab notes. Release 0.2 reads:
+#   configs/experiment.yaml          — baseline dates, purge/embargo, fixture seed
+#   configs/universe/liquid50.yaml   — dated 50-name roster
+#   configs/risk.yaml                — risk limits (unused by the baseline)
 #
-# Placeholder shape only — no code reads this file until Weeks 3-4.
-# No secrets belong in this file. Credentials come from the environment.
-
+# Do not put secrets here.
 lab:
   environment: dev
   timezone: UTC
-
-universe:
-  # A dated universe with membership by date. Start small: 50 liquid names,
-  # not 300. `source` must be a licensed API, never a scraped page.
-  id: liquid50_v1
-  source: null
-  max_names: 50
-  # Set true only for a source that provides genuine point-in-time membership.
-  # yfinance current S&P membership is NOT point-in-time.
-  point_in_time: false
-
-data:
-  bar_interval: 1day
-  adjustment: split_and_dividend
-  root: ./data
-
-walk_forward:
-  # Purge and embargo are required, not optional. They remove label overlap
-  # around split boundaries.
-  purge: P21D
-  embargo: P5D
-
-costs:
-  model_id: conservative_v1
-
-experiment:
-  # The holdout is declared at registration and stays sealed until the freeze.
-  holdout_start: null
-  holdout_end: null

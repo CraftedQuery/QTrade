@@ -2,17 +2,26 @@
 
 Resolved experiment and runtime configuration.
 
-`risk.yaml` **is** read by code, via `lab.config.load_risk_limits()`.
-`base.yaml` is not yet — experiment configuration loading arrives in Release 0.2;
-it exists now so the shape is agreed before any code depends on it.
+| File | Read by |
+|---|---|
+| `risk.yaml` | `lab.config.load_risk_limits()` |
+| `experiment.yaml` | `lab.experiments.config.load_experiment_config()` |
+| `universe/liquid50.yaml` | `lab.universe.dated.load_universe()` |
+| `base.yaml` | Not read. Pointer only. |
 
-## How configuration relates to research integrity
+No secrets belong in this directory. Credentials come from the environment;
+see `.env.example`.
 
-Every `Experiment` record stores a `config_hash`. That hash is taken over the
-*resolved* configuration — after defaults, file values, and any overrides are
-merged — so a stored result can always be traced back to the exact settings that
-produced it. Two experiments with the same `config_hash` must be reproducible
-from the same commit.
+## Experiment configuration
+
+`experiment.yaml` is the source of truth for the Release 0.2 baseline: split
+dates, purge, embargo, fixture seed, and the research cost model
+(`one_way_cost_bps`). Those costs are a backtest assumption, not the
+owner-mandate risk numbers in `risk.yaml`.
+
+Every `Experiment` record stores a `config_hash` of the *resolved* experiment
+settings so a stored result can be traced back to the exact file that produced
+it.
 
 ## Risk limits
 
@@ -22,27 +31,12 @@ from the same commit.
 built-in defaults  <  configs/risk.yaml  <  LAB_RISK_* environment variables
 ```
 
-so a limit can be changed without touching code — edit the file, or export a
-variable for a single run.
-
-Limits are read **once at startup** and are never mutable at runtime. That is
-deliberate. Every `RiskDecision` stores a `risk_config_hash` covering the numeric
-limits, and a decision has to stay recomputable from it; a limit that could move
-mid-session would make the audit trail meaningless. Change a limit, restart, and
-the hash changes with it, so the record shows which numbers produced which
-decisions.
-
-The shipped values are conservative **placeholders**, marked
-`owner_approved: false`. Replace them with the owner's numbers from
-`docs/00_owner_mandate.md` §3 and set the flag. Until then the limits report
-themselves as provisional, and Release 0.3 will refuse to run an unattended
-session.
-
-No model output may edit these settings, and `RiskLimits` exposes no mutation
-method.
+Limits are read **once at startup** and are never mutable at runtime. The
+shipped values are conservative **placeholders**, marked `owner_approved: false`.
+The baseline experiment does not consume them.
 
 ## Rules
 
-- No secrets here. Credentials come from the environment; see `.env.example`.
+- No secrets here. Credentials come from the environment.
 - Configuration is committed, so a config change is a reviewable diff.
 - Do not add a key that no code reads. An unused key is a false promise.

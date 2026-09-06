@@ -1,0 +1,11 @@
+universe:
+  id: tiny4_v1
+  source: test-fixture
+  point_in_time: false
+  max_names: 4
+  benchmark_symbol: SPY
+  instruments:
+    - {symbol: SPY, name: SPDR S&P 500 ETF Trust, asset_class: us_etf, exchange: NYSE ARCA, listed_on: 1993-01-22}
+    - {symbol: AAA, name: Listed throughout, asset_class: us_equity, exchange: NYSE, listed_on: 2000-01-03}
+    - {symbol: BBB, name: Lists mid-sample, asset_class: us_equity, exchange: NYSE, listed_on: 2022-10-03}
+    - {symbol: DED, name: Delisted mid-sample, asset_class: us_equity, exchange: NYSE, listed_on: 2000-01-03, delisted_on: 2022-09-15}

@@ -22,10 +22,10 @@ catalogue future releases build against.
 | OHLCV bar contract with explicit information time | ✅ Shipped | 0.1 | `information_time` = bar close, never bar open |
 | Corporate-action adjustment tracking | ✅ Shipped | 0.1 | Recorded per bar; prevents mixing adjusted and raw series |
 | Data provenance on every record | ✅ Shipped | 0.1 | `source` and ingestion timestamp |
-| Dated liquid U.S. universe (50 names to start) | ⬜ Planned | 0.2 | Grows toward 100–300 only once membership by date is real |
-| Licensed historical bar ingestion | ⬜ Planned | 0.2 | Licensed APIs only; no scraping |
-| Parquet + DuckDB local store | ⬜ Planned | 0.2 | |
-| Survivorship warning on non-point-in-time sources | ⬜ Planned | 0.2 | Flags yfinance-style current-membership lists |
+| Dated liquid U.S. universe (50 names to start) | ✅ Shipped | 0.2 | `configs/universe/liquid50.yaml`; `members_on(day)` applies listing windows. Grows toward 100–300 only once a true PIT membership tape exists |
+| Licensed historical bar ingestion | ✅ Shipped | 0.2 | Default is committed synthetic fixtures. Optional Alpaca Market Data (`data.alpaca.markets`, IEX) when paper keys are present. No scraping |
+| Parquet + DuckDB local store | ⬜ Planned | 0.3 | 0.2 keeps bars in memory; fixtures are generated from a committed seed |
+| Survivorship warning on non-point-in-time sources | ✅ Shipped | 0.2 | `SurvivorshipWarning` on every non-PIT roster, including this liquid-50 list |
 
 ## 2. Research integrity
 
@@ -43,22 +43,22 @@ review comments.
 | Sealed holdout with unseal timestamp | ✅ Shipped | 0.1 | `holdout_is_sealed` until first viewed |
 | Predictions immutable and outcome-free | ✅ Shipped | 0.1 | Outcomes join later; predictions are never revised |
 | Append-only record semantics | ✅ Shipped | 0.1 | All contracts frozen |
-| Purge/embargo applied in the split generator | ⬜ Planned | 0.2 | The computational half of the guarantee |
-| Look-ahead test suite over real features | ⬜ Planned | 0.2 | Acceptance test #2, end to end |
-| Holdout evaluation isolated from training code | ⬜ Planned | 0.2 | Acceptance test #3 |
-| MLflow experiment tracking | ⬜ Planned | 0.2 | |
-| Rank IC, turnover, drawdown, net-of-cost reporting | ⬜ Planned | 0.2 | Win rate is explicitly not a target |
+| Purge/embargo applied in the split generator | ✅ Shipped | 0.2 | `lab.experiments.splits.assign` drops purged and embargoed timestamps |
+| Look-ahead test suite over real features | ✅ Shipped | 0.2 | Acceptance test #2, against `compute_momentum`, not only construction |
+| Holdout evaluation isolated from training code | ✅ Shipped | 0.2 | Acceptance test #3: `train.py` does not import `holdout.py` |
+| MLflow experiment tracking | ⬜ Planned | 0.3 | Deferred; artifacts are JSON under `artifacts/experiments/` |
+| Rank IC, turnover, drawdown, net-of-cost reporting | ✅ Shipped | 0.2 | Win rate is explicitly not a target. Every number carries `trial_count` |
 
 ## 3. Strategy and baselines
 
 | Feature | Status | Release | Notes |
 |---|---|---|---|
-| Cash baseline | ⬜ Planned | 0.2 | |
-| Benchmark ETF baseline | ⬜ Planned | 0.2 | |
-| Equal-weight baseline | ⬜ Planned | 0.2 | The control every result is judged against |
-| Simple momentum / risk baseline | ⬜ Planned | 0.2 | |
-| Regularized linear model | ⬜ Planned | 0.2 | |
-| One-command baseline run | ⬜ Planned | 0.2 | `uv run python -m lab.experiments.baseline` |
+| Cash baseline | ✅ Shipped | 0.2 | 100% cash, zero return |
+| Benchmark ETF baseline | ✅ Shipped | 0.2 | 100% SPY when SPY is a member that day |
+| Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
+| Simple momentum / risk baseline | ✅ Shipped | 0.2 | 21-session momentum, long the top half equal-weight. No risk-engine sizing |
+| Regularized linear model | ⬜ Planned | 0.3 | Not in the locked 0.2 acceptance |
+| One-command baseline run | ✅ Shipped | 0.2 | `make experiment-baseline` or `uv run python -m lab.experiments.baseline` |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
 
 ## 4. Risk and execution
