@@ -9,6 +9,7 @@ from urllib.request import Request
 import pytest
 
 from lab.data.alpaca import ALLOWED_DATA_HOSTS, alpaca_keys_present, fetch_daily_bars
+from lab.data.calendar import weekdays
 
 
 class _FakeResponse:
@@ -100,6 +101,58 @@ def test_fetch_parses_bars_and_does_not_echo_secrets() -> None:
     # Lab end 2022-08-02 is exclusive; Alpaca's end is inclusive → 2022-08-01.
     assert "end=2022-08-01" in url
     assert "end=2022-08-02" not in url
+
+
+def test_alpaca_window_matches_fixture_weekdays() -> None:
+    """Same [start, end) as generate_daily_bars: last fixture day is Alpaca's inclusive end."""
+    start, end = date(2022, 8, 1), date(2022, 8, 6)  # Mon-Sat; fixtures include Mon-Fri only
+    fixture_days = weekdays(start, end)
+    assert fixture_days == [
+        date(2022, 8, 1),
+        date(2022, 8, 2),
+        date(2022, 8, 3),
+        date(2022, 8, 4),
+        date(2022, 8, 5),
+    ]
+    captured: list[Request] = []
+
+    def opener(request: Request, timeout: float = 30) -> _FakeResponse:
+        captured.append(request)
+        return _FakeResponse(
+            {
+                "bars": {
+                    "SPY": [
+                        {
+                            "t": "2022-08-05T04:00:00Z",
+                            "o": 400.0,
+                            "h": 405.0,
+                            "l": 399.0,
+                            "c": 403.0,
+                            "v": 1000,
+                        },
+                        {
+                            "t": "2022-08-06T04:00:00Z",
+                            "o": 410.0,
+                            "h": 411.0,
+                            "l": 409.0,
+                            "c": 410.0,
+                            "v": 1000,
+                        },
+                    ]
+                },
+                "next_page_token": None,
+            }
+        )
+
+    env = {
+        "ALPACA_API_KEY_ID": "paper-key",
+        "ALPACA_API_SECRET_KEY": "paper-secret",
+    }
+    bars = fetch_daily_bars(["SPY"], start, end, env=env, opener=opener)
+    url = captured[0].get_full_url()
+    assert f"end={fixture_days[-1].isoformat()}" in url
+    assert f"end={end.isoformat()}" not in url
+    assert {bar.ts_start.date() for bar in bars} == {fixture_days[-1]}
 
 
 def test_empty_half_open_range_does_not_call_alpaca() -> None:

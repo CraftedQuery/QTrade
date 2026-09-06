@@ -58,7 +58,7 @@ review comments.
 | Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ✅ Shipped | 0.2 | 21-session momentum, long the top half equal-weight. No risk-engine sizing |
 | Regularized linear model | ⬜ Planned | 0.3 | Not in the locked 0.2 acceptance |
-| One-command baseline run | ✅ Shipped | 0.2 | `make experiment-baseline` or `uv run python -m lab.experiments.baseline` |
+| One-command baseline run | ✅ Shipped | 0.2 | `make experiment-baseline`. On the committed fixture seed, holdout net is cash 0 / SPY negative / equal-weight ahead of momentum — a finding, not a retune target |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
 
 ## 4. Risk and execution
