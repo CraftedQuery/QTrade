@@ -95,7 +95,7 @@ def fetch_daily_bars(
     secret = mapping["ALPACA_API_SECRET_KEY"].strip()
     base = _data_base_url(mapping)
     stamped = datetime.now(tz=UTC) if ingested_at is None else ingested_at
-        fetch: Callable[..., Any] = opener if opener is not None else urlopen  # noqa: S310
+    fetch: Callable[..., Any] = opener if opener is not None else urlopen
     bars: list[Bar] = []
     page_token: str | None = None
     # Alpaca's end is inclusive; the lab uses exclusive end dates.

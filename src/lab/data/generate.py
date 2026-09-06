@@ -41,7 +41,7 @@ def generate_daily_bars(
     days = weekdays(start, end)
     bars: list[Bar] = []
     for symbol in symbols:
-        rng = random.Random(f"{seed}:{symbol}")
+        rng = random.Random(f"{seed}:{symbol}")  # noqa: S311 — fixture paths, not crypto
         price = Decimal(str(round(40 + rng.random() * 160, 2)))
         for day in days:
             ret = Decimal(str(round(rng.gauss(0.0004, 0.012), 6)))

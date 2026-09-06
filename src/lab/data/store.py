@@ -14,7 +14,10 @@ def group_bars(bars: Sequence[Bar]) -> dict[str, list[Bar]]:
     grouped: dict[str, list[Bar]] = defaultdict(list)
     for bar in bars:
         grouped[bar.symbol].append(bar)
-    return {symbol: sorted(items, key=lambda item: item.information_time) for symbol, items in grouped.items()}
+    return {
+        symbol: sorted(items, key=lambda item: item.information_time)
+        for symbol, items in grouped.items()
+    }
 
 
 def bars_available_at(bars: Iterable[Bar], as_of: datetime) -> list[Bar]:
