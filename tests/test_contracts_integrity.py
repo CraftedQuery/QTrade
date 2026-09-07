@@ -20,6 +20,7 @@ from lab.contracts import (
     Proposal,
     RiskDecision,
     derive_client_order_id,
+    derive_decision_id,
     execution,
 )
 from lab.contracts.enums import AccountMode, FillSource, OrderType, RiskOutcome, Side
@@ -259,6 +260,19 @@ def test_contract_source_never_names_a_live_endpoint() -> None:
     for path in sorted(package.glob("*.py")):
         source = path.read_text(encoding="utf-8").lower()
         assert "https://api.alpaca.markets" not in source, f"live endpoint named in {path.name}"
+    exec_pkg = Path(execution.__file__).resolve().parents[1] / "execution"
+    for path in sorted(exec_pkg.glob("*.py")):
+        source = path.read_text(encoding="utf-8").lower()
+        assert "https://api.alpaca.markets" not in source, f"live endpoint named in {path.name}"
+
+
+def test_decision_id_is_deterministic_for_a_proposal() -> None:
+    """Replaying a proposal against the same limits yields the same decision id."""
+    first = derive_decision_id("prop-1", "deadbeef99")
+    second = derive_decision_id("prop-1", "deadbeef99")
+    assert first == second
+    assert first != derive_decision_id("prop-2", "deadbeef99")
+    assert first != derive_decision_id("prop-1", "cafebabe00")
 
 
 def test_client_order_id_is_deterministic() -> None:

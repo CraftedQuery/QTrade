@@ -122,9 +122,10 @@ constructed.
 
 `client_order_id` comes from `derive_client_order_id(decision_id, symbol, side)`,
 a pure SHA-256 of its inputs — no clock, no counter, no random component.
-Replaying the same decision yields the same key, so the broker rejects the
-duplicate rather than opening a second position. This is the contract-level half
-of acceptance test #1.
+`decision_id` itself comes from `derive_decision_id(proposal_id, risk_config_hash)`,
+so replaying the same proposal against the same limits yields the same keys.
+The paper adapter looks up that client order id before creating anything. This
+is acceptance test #1, end to end in Release 0.3.
 
 > Changing `derive_client_order_id` changes every future key. Treat it as part
 > of the contract, not as an implementation detail.

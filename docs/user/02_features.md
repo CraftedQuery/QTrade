@@ -24,7 +24,7 @@ catalogue future releases build against.
 | Data provenance on every record | ✅ Shipped | 0.1 | `source` and ingestion timestamp |
 | Dated liquid U.S. universe (50 names to start) | ✅ Shipped | 0.2 | `configs/universe/liquid50.yaml`; `members_on(day)` applies listing windows. Grows toward 100–300 only once a true PIT membership tape exists |
 | Licensed historical bar ingestion | ✅ Shipped | 0.2 | Default is committed synthetic fixtures. Optional Alpaca Market Data (`data.alpaca.markets`, IEX) when paper keys are present. No scraping |
-| Parquet + DuckDB local store | ⬜ Planned | 0.3 | 0.2 keeps bars in memory; fixtures are generated from a committed seed |
+| Parquet + DuckDB local store | ⬜ Planned | later | Deferred; 0.3 uses an append-only JSONL ledger for execution records |
 | Survivorship warning on non-point-in-time sources | ✅ Shipped | 0.2 | `SurvivorshipWarning` on every non-PIT roster, including this liquid-50 list |
 
 ## 2. Research integrity
@@ -46,7 +46,7 @@ review comments.
 | Purge/embargo applied in the split generator | ✅ Shipped | 0.2 | `lab.experiments.splits.assign` drops purged and embargoed timestamps |
 | Look-ahead test suite over real features | ✅ Shipped | 0.2 | Acceptance test #2, against `compute_momentum`, not only construction |
 | Holdout evaluation isolated from training code | ✅ Shipped | 0.2 | Acceptance test #3: `train.py` does not import `holdout.py` |
-| MLflow experiment tracking | ⬜ Planned | 0.3 | Deferred; artifacts are JSON under `artifacts/experiments/` |
+| MLflow experiment tracking | ⬜ Planned | later | Deferred; artifacts are JSON under `artifacts/experiments/` and `artifacts/execution/` |
 | Rank IC, turnover, drawdown, net-of-cost reporting | ✅ Shipped | 0.2 | Win rate is explicitly not a target. Every number carries `trial_count` |
 
 ## 3. Strategy and baselines
@@ -57,7 +57,7 @@ review comments.
 | Benchmark ETF baseline | ✅ Shipped | 0.2 | 100% SPY when SPY is a member that day |
 | Equal-weight baseline | ✅ Shipped | 0.2 | The control every result is judged against |
 | Simple momentum / risk baseline | ✅ Shipped | 0.2 | 21-session momentum, long the top half equal-weight. No risk-engine sizing |
-| Regularized linear model | ⬜ Planned | 0.3 | Not in the locked 0.2 acceptance |
+| Regularized linear model | ⬜ Planned | later | Not in the locked 0.3 acceptance |
 | One-command baseline run | ✅ Shipped | 0.2 | `make experiment-baseline`. On the committed fixture seed, holdout net is cash 0 / SPY negative / equal-weight ahead of momentum — a finding, not a retune target |
 | Static or risk-balanced sleeve weights | ⬜ Planned | 0.4 | No adaptive allocator |
 
@@ -65,6 +65,7 @@ review comments.
 
 | Feature | Status | Release | Notes |
 |---|---|---|---|
+| Trade proposals from the 0.2 baseline | ✅ Shipped | 0.3 | Momentum / equal-weight / SPY / cash sleeves become a `Proposal` |
 | Long-or-cash-only proposals | ✅ Shipped | 0.1 | Negative weights unrepresentable |
 | Leverage rejection | ✅ Shipped | 0.1 | Invested weight above 1 raises |
 | Derived cash weight | ✅ Shipped | 0.1 | Cannot disagree with position weights |
@@ -74,14 +75,14 @@ review comments.
 | Paper-only account mode | ✅ Shipped | 0.1 | One-member enum; live orders unrepresentable |
 | Deterministic idempotent client order IDs | ✅ Shipped | 0.1 | Pure function of the decision |
 | Broker vs. shadow fill separation | ✅ Shipped | 0.1 | Never merged, never overwritten |
-| Alpaca **paper** adapter | ⬜ Planned | 0.3 | Paper endpoint only |
+| Alpaca **paper** adapter | ✅ Shipped | 0.3 | `paper-api.alpaca.markets` only; live trading host refused. Fixture path uses an in-process fake broker |
 | Configurable risk limits (file + env, hashed) | ✅ Shipped | 0.1 | `configs/risk.yaml`, `LAB_RISK_*`; provisional until the mandate is completed |
-| Risk limits enforced against live proposals | ⬜ Planned | 0.3 | The values exist and are validated; enforcement lands with the risk engine |
-| Stale-data halt | ⬜ Planned | 0.3 | |
-| Kill switch | ⬜ Planned | 0.3 | |
-| Position reconciliation after restart | ⬜ Planned | 0.3 | |
-| Conservative internal shadow fills | ⬜ Planned | 0.3 | Deliberately worse than paper: spread plus delay |
-| Duplicate-order failure tests | ⬜ Planned | 0.3 | Acceptance test #1, end to end |
+| Risk limits enforced against live proposals | ✅ Shipped | 0.3 | Gross exposure, name cap, name count, daily loss, drawdown, stale data. Hard limits reject; name/gross/count reduce |
+| Stale-data halt | ✅ Shipped | 0.3 | Data older than `max_data_staleness_seconds` rejects the proposal |
+| Kill switch | ✅ Shipped | 0.3 | `LAB_KILL_SWITCH` or a flag file. Engaged → every decision is rejected |
+| Position reconciliation after restart | ✅ Shipped | 0.3 | Local JSONL ledger vs broker. Unclean books refuse new orders |
+| Conservative internal shadow fills | ✅ Shipped | 0.3 | 10 bps worse plus 30s delay. Never mutate the book; never overwrite broker fills |
+| Duplicate-order failure tests | ✅ Shipped | 0.3 | Acceptance test #1, end to end |
 
 ## 5. News and text (narrow)
 
@@ -104,8 +105,8 @@ review comments.
 | Secret hygiene enforced by tests | ✅ Shipped | 0.1 | Acceptance test #5 |
 | Generated JSON Schemas with drift detection | ✅ Shipped | 0.1 | `make schemas`; stale files fail the suite |
 | Lint, format, and test in one command | ✅ Shipped | 0.1 | `make check` |
-| Docker Compose local run | ⬜ Planned | 0.3 | |
-| PostgreSQL record store | ⬜ Planned | 0.3 | Contracts exist now; persistence lands here |
+| Docker Compose local run | ⬜ Planned | later | Deferred; 0.3 is a local Python command |
+| PostgreSQL record store | ⬜ Planned | later | 0.3 persists execution records as append-only JSONL |
 | Thin Streamlit ops dashboard | ⬜ Planned | 0.5 | Positions, last decisions, reconciliation status, sleeve P&L |
 | Five-session unattended paper run | ⬜ Planned | 0.5 | No missing decision, no unreconciled state |
 | Backup and restore of the database volume | ⬜ Planned | 0.5 | |

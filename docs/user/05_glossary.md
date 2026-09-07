@@ -73,6 +73,13 @@ exposure cap, name count, daily loss halt, drawdown stop, data staleness. Held i
 **Provisional limits** — risk limits that are conservative placeholders rather
 than the owner's real numbers. Flagged by `owner_approved: false`; the lab
 reports its own limits as provisional until the mandate is completed.
+Unattended paper sessions refuse to start while this flag is false.
+
+**Attended session** — a paper-execution run with an operator present. May use
+provisional limits. The default `make paper-session` path.
+
+**Unattended session** — a paper-execution run with `--unattended`. Refused
+while limits are provisional.
 
 **Config hash** — a deterministic hash of the resolved risk limits, stamped onto
 every risk decision so the decision stays recomputable and you can always tell

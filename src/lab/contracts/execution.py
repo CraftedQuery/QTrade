@@ -145,6 +145,17 @@ class RiskDecision(LabRecord):
         return [check.limit_id for check in self.checks if check.breached]
 
 
+def derive_decision_id(proposal_id: str, risk_config_hash: str) -> str:
+    """Return the deterministic decision id for one proposal and limit set.
+
+    Replaying the same proposal against the same hashed limits yields the same
+    id, so the downstream client order keys stay stable and a second broker
+    order cannot be created.
+    """
+    digest = hashlib.sha256(f"{proposal_id}|{risk_config_hash}".encode()).hexdigest()
+    return f"dec-{digest[:32]}"
+
+
 def derive_client_order_id(decision_id: str, symbol: str, side: Side) -> str:
     """Return the deterministic idempotency key for one leg of a risk decision.
 
@@ -228,4 +239,5 @@ __all__ = [
     "ProposalLine",
     "RiskDecision",
     "derive_client_order_id",
+    "derive_decision_id",
 ]
