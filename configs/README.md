@@ -33,7 +33,8 @@ built-in defaults  <  configs/risk.yaml  <  LAB_RISK_* environment variables
 
 Limits are read **once at startup** and are never mutable at runtime. The
 shipped values are conservative **placeholders**, marked `owner_approved: false`.
-The baseline experiment does not consume them.
+Release 0.3's risk engine consumes them on every paper session. They stay
+provisional until the owner mandate is completed.
 
 ## Rules
 

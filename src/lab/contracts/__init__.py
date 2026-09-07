@@ -20,6 +20,7 @@ from lab.contracts.execution import (
     ProposalLine,
     RiskDecision,
     derive_client_order_id,
+    derive_decision_id,
 )
 from lab.contracts.market import Bar, Instrument
 from lab.contracts.research import Experiment, FeatureSnapshot, Prediction
@@ -59,4 +60,5 @@ __all__ = [
     "ProposalLine",
     "RiskDecision",
     "derive_client_order_id",
+    "derive_decision_id",
 ]

@@ -23,7 +23,7 @@ enforced in their types rather than left to review.
 
 ## Release 0.2 — Data and baseline ✅
 
-*Weeks 3–4. Current release.*
+*Weeks 3–4.*
 
 - Dated 50-name universe with membership by date (`members_on`)
 - Historical bars: committed fixture generator by default; optional Alpaca
@@ -44,24 +44,27 @@ regularized linear, MLflow, Parquet/DuckDB.
 **Known gap:** the liquid-50 roster is a current-name list with listing dates
 applied, not a point-in-time membership tape. Membership queries warn.
 
-## Release 0.3 — Paper execution and risk ⬜
+## Release 0.3 — Paper execution and risk ✅
 
-*Weeks 5–6.* Risk limits are already configurable in `configs/risk.yaml`; they
-ship as **provisional placeholders** and report themselves as such until
-[`../00_owner_mandate.md`](../00_owner_mandate.md) §3 is completed and
-`owner_approved` is set. Release 0.3 refuses to run an unattended session while
-the limits are provisional.
+*Weeks 5–6. Current release.* Risk limits stay **provisional placeholders**
+(`owner_approved: false`) until [`../00_owner_mandate.md`](../00_owner_mandate.md)
+§3 is completed. An unattended session refuses to start while they are
+provisional. Edit `configs/risk.yaml` or `LAB_RISK_*` and restart to change a
+limit; nothing mutates limits mid-session.
 
-- Trade proposals generated from the baseline
-- Deterministic limits enforced: gross exposure, name cap, daily loss, stale data
-  (the values themselves are configurable as of 0.1)
-- Kill switch
-- Alpaca **paper** adapter with idempotent client order IDs
-- Reconciliation of local state against the broker after restart
+- Trade proposals generated from the 0.2 baseline sleeves
+- Deterministic limits enforced: gross exposure, name cap, name count, daily
+  loss, drawdown, stale data
+- Kill switch (`LAB_KILL_SWITCH` or a flag file)
+- Alpaca **paper** adapter with idempotent client order IDs; live host refused
+- Reconciliation of local state against the broker after a restart
 - Conservative internal shadow fills, deliberately worse than paper
 
 **Done when:** replaying a proposal cannot create a second broker order, and a
 restart reconciles cleanly.
+
+**Explicitly not in 0.3:** news, LLM, Streamlit, Docker Compose, PostgreSQL,
+Parquet/DuckDB, MLflow, regularized linear.
 
 ## Release 0.4 — News feature, narrowly ⬜
 
@@ -115,7 +118,7 @@ Tracked across releases. These are the checks that keep results believable.
 
 | # | Test | Status |
 |---|---|---|
-| 1 | Replaying the same proposal cannot create a second broker order | 🟡 Contract-level (0.1) → end to end in 0.3 |
+| 1 | Replaying the same proposal cannot create a second broker order | ✅ Shipped (0.3), end to end |
 | 2 | Features computed at *t* cannot read prices after *t* | ✅ Shipped (0.2), computed features |
 | 3 | Holdout evaluation is separate from training code | ✅ Shipped (0.2) |
 | 4 | LLM outage degrades to quant-only; risk engine still runs | ⬜ 0.4 |

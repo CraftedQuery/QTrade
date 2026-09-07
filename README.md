@@ -10,12 +10,13 @@ product is an honest answer about whether a signal works — including the answe
 > authority over every order. No live brokerage credentials are ever requested,
 > stored, or used.
 
-## Status — Release 0.2: data and baseline
+## Status — Release 0.3: paper execution and risk
 
-The lab loads a dated 50-name universe, computes momentum with an explicit
-information cutoff, and reproduces a walk-forward baseline (momentum vs. cash
-vs. SPY vs. equal weight) from committed fixtures. No broker orders, no LLM,
-no dashboard.
+The lab loads a dated 50-name universe, reproduces the walk-forward baseline,
+and can turn a sleeve into a paper order path: proposal → deterministic risk
+→ Alpaca paper (or a fake broker) → reconcile → shadow fill. Risk limits stay
+provisional (`owner_approved: false`). Unattended sessions refuse to start
+until the owner mandate is completed. No LLM, no dashboard.
 
 See [`docs/user/02_features.md`](docs/user/02_features.md) for the status of
 every planned capability, and [`CHANGELOG.md`](CHANGELOG.md) for what landed.
@@ -26,6 +27,7 @@ every planned capability, and [`CHANGELOG.md`](CHANGELOG.md) for what landed.
 make install               # uv sync --extra dev
 make check                 # ruff + pytest
 make experiment-baseline   # momentum vs cash / SPY / equal weight
+make paper-session         # attended paper path (fixture + fake broker)
 ```
 
 Full instructions: [`docs/user/04_getting_started.md`](docs/user/04_getting_started.md).
@@ -81,7 +83,7 @@ docs/        Mandate, build plan, contract reference
 docs/user/   User-facing documentation
 schemas/     Generated JSON Schemas — never hand-edit
 src/lab/     The package
-tests/       Contract, look-ahead, split, holdout-isolation, and hygiene tests
+tests/       Contract, look-ahead, split, holdout-isolation, execution, and hygiene tests
 ```
 
 ## Commands
@@ -93,6 +95,7 @@ tests/       Contract, look-ahead, split, holdout-isolation, and hygiene tests
 | `make test` | Run the test suite |
 | `make schemas` | Regenerate `schemas/*.schema.json` from the models |
 | `make experiment-baseline` | Reproduce the 0.2 baseline from committed fixtures |
+| `make paper-session` | Attended paper session (fixture + fake broker) |
 | `make check` | Everything CI would run |
 
 ## Contributing
@@ -110,10 +113,5 @@ experiment and report the trial count.
 
 ## Next up
 
-**Release 0.3 — paper execution and risk.** Trade proposals from the baseline,
-deterministic limits, an Alpaca **paper** adapter, and conservative shadow
-fills. Risk limits are already configurable in
-[`configs/risk.yaml`](configs/risk.yaml) and overridable with `LAB_RISK_*`.
-The shipped values are conservative placeholders that report themselves as
-provisional until [`docs/00_owner_mandate.md`](docs/00_owner_mandate.md) §3 is
-completed and `owner_approved` is set.
+**Release 0.4 — news feature, narrowly.** One licensed news source, a small
+owner-labelled gold set, a TF-IDF control, and one LLM extractor. Not started.

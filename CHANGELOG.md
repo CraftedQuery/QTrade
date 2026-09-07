@@ -7,6 +7,56 @@ Versions correspond to the releases in [`docs/user/03_roadmap.md`](docs/user/03_
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-09-07
+
+Paper execution and risk (Weeks 5–6). Paper only. No news, no LLM, no
+dashboard. Risk numbers stay **provisional** (`owner_approved: false`).
+
+### Added
+- Trade proposals from the 0.2 baseline sleeves (`lab.execution.proposals`).
+  Proposal ids are a pure function of experiment, sleeve, and `as_of`.
+- Deterministic risk engine (`lab.execution.risk`) that evaluates live
+  proposals against `configs/risk.yaml` / `LAB_RISK_*`: kill switch, stale
+  data, daily loss, drawdown, name cap, name count, gross exposure. Hard
+  limits reject; name/gross/count limits reduce. Sells cannot open a short.
+  Decision ids are a pure function of proposal id and `risk_config_hash`.
+- Kill switch via `LAB_KILL_SWITCH` or a flag file (`LAB_KILL_SWITCH_PATH`).
+- Alpaca **paper** adapter (`lab.execution.alpaca_paper`) with idempotent
+  `client_order_id`. HTTPS to `paper-api.alpaca.markets` only; the live
+  trading host is refused.
+- In-process fake paper broker for fixture runs and tests (no secrets).
+- Append-only JSONL ledger (`data/execution/`) so a restart can rebuild
+  local state and compare it to the broker.
+- Restart reconciliation. An unclean book refuses new orders.
+- Conservative internal shadow fills (10 bps worse, 30s delay). Shadow
+  fills never mutate the book and never overwrite broker paper fills.
+- One command: `make paper-session` /
+  `uv run python -m lab.execution`. Default is an **attended** fixture
+  session against the fake broker. `--unattended` exits 3 while limits
+  are provisional.
+- End-to-end acceptance test #1: replaying a proposal cannot create a
+  second broker order.
+
+### Changed
+- Package version `0.3.0`.
+- `.env.example` documents the kill-switch variables.
+
+### Security
+- No live trading host is used as a default or as a requested URL.
+- Paper keys stay in the environment; they are not written to artifacts.
+- Unattended sessions cannot run on placeholder risk numbers.
+
+### Known gaps
+- `docs/00_owner_mandate.md` §3 is still blank. Limits remain provisional.
+  Change them in `configs/risk.yaml` or `LAB_RISK_*` and restart; do not
+  set `owner_approved: true` until the mandate is filled in.
+- Fixture sessions use the research clock (`decided_at = as_of`). Daily
+  bars versus a 300-second stale halt will reject under `--clock wall`
+  unless a fresher mark is supplied.
+- Parquet/DuckDB, PostgreSQL, Docker Compose, MLflow, and a regularized
+  linear model were left out of this slice.
+- The liquid-50 roster is still not a point-in-time membership tape.
+
 ## [0.2.0] — 2026-09-06
 
 Data and baseline (Weeks 3–4). Paper research only. No broker orders, no news,
@@ -122,6 +172,7 @@ schema drift, and repository hygiene.
 - Acceptance tests #1 and #2 hold at the contract level only; they become end to
   end in Releases 0.3 and 0.2 respectively.
 
-[Unreleased]: https://github.com/CraftedQuery/QTrade/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/CraftedQuery/QTrade/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/CraftedQuery/QTrade/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CraftedQuery/QTrade/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CraftedQuery/QTrade/releases/tag/v0.1.0

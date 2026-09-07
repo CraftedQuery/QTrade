@@ -2,10 +2,12 @@
 
 ## What you can run today
 
-Release 0.2 ships a dated 50-name universe, walk-forward splits with purge and
-embargo, and a baseline experiment: momentum vs. cash vs. SPY vs. equal
-weight. The default run uses committed fixtures and needs no secrets. It does
-**not** place broker orders, call an LLM, or open a dashboard.
+Release 0.3 ships the 0.2 baseline plus an attended paper-execution path:
+proposals from the baseline sleeves, a deterministic risk engine, an Alpaca
+**paper** adapter (or an in-process fake broker), restart reconciliation, and
+conservative shadow fills. The default commands use committed fixtures and
+need no secrets. They do **not** call an LLM or open a dashboard. Unattended
+sessions refuse to start while risk limits are provisional.
 
 ## Requirements
 
@@ -74,6 +76,46 @@ That is a finding, not a retune target.
 
 This is acceptance test #6.
 
+## Run an attended paper session
+
+```bash
+make paper-session
+```
+
+or:
+
+```bash
+uv run python -m lab.execution --source fixture --broker fake
+```
+
+The command:
+
+1. builds a proposal from the 0.2 momentum sleeve (override with `--sleeve`)
+2. evaluates it against `configs/risk.yaml` (provisional until the mandate is filled)
+3. submits approved/reduced lines to the in-process fake paper broker
+4. writes a conservative internal shadow fill next to each broker fill
+5. appends records under `--ledger` (default `data/execution/`) and JSON under `--output`
+
+Re-running the same sleeve and `as_of` replays the same proposal id and cannot
+create a second broker order. Restarting against the same ledger reconciles
+local positions to the broker; an unclean book refuses new orders.
+
+`--unattended` exits 3 while `owner_approved` is false. That is intentional.
+
+`--clock as_of` (the default) evaluates the proposal at the bar close it
+targets, so a fixture replay is not rejected as years-stale. `--clock wall`
+compares last-bar age to `now` and will typically trip the 300-second stale
+halt on daily bars.
+
+To send orders to Alpaca paper (attended, paper keys only):
+
+```bash
+uv run python -m lab.execution --source fixture --broker alpaca
+```
+
+There is deliberately no live trading endpoint. A test asserts the adapter
+refuses `api.alpaca.markets`.
+
 ## Configure
 
 ```bash
@@ -105,8 +147,8 @@ each beating the one before:
 built-in defaults  <  configs/risk.yaml  <  LAB_RISK_* environment variables
 ```
 
-The baseline experiment does **not** read these limits. They exist for Release
-0.3. Edit the file for a lasting change:
+Release 0.3 reads these limits on every paper session. They resolve once at
+process start and never change mid-session. Edit the file for a lasting change:
 
 ```yaml
 # configs/risk.yaml
@@ -142,9 +184,11 @@ or a name count that cannot reach the gross target.
 > decision stores a hash of the limits it was checked against, so it stays
 > recomputable. Change a limit and restart; the hash changes with it.
 
-The shipped values are conservative placeholders. Replace them with your own in
-[`../00_owner_mandate.md`](../00_owner_mandate.md) §3, copy them into
-`configs/risk.yaml`, and set `owner_approved: true`.
+The shipped values are conservative placeholders (`owner_approved: false`).
+Unattended sessions refuse to run until you fill
+[`../00_owner_mandate.md`](../00_owner_mandate.md) §3, copy the numbers into
+`configs/risk.yaml`, and set `owner_approved: true`. Attended sessions may run
+on the placeholders. Do not flip `owner_approved` just to silence the refusal.
 
 ## Commands
 
@@ -155,6 +199,7 @@ The shipped values are conservative placeholders. Replace them with your own in
 | `make test` | Run the test suite |
 | `make schemas` | Regenerate `schemas/*.schema.json` from the models |
 | `make experiment-baseline` | Reproduce the 0.2 baseline from committed fixtures |
+| `make paper-session` | Attended paper session (fixture + fake broker, no secrets) |
 | `make check` | Lint and test — everything CI would run |
 
 ## Using the contracts
@@ -195,8 +240,8 @@ configs/     Experiment, universe, and risk configuration
 docs/        Mandate, build plan, contract reference
 docs/user/   This documentation
 schemas/     Generated JSON Schemas — never hand-edit
-src/lab/     The package (contracts, data, universe, features, experiments)
-tests/       Contract, look-ahead, split, holdout-isolation, and hygiene tests
+src/lab/     The package (contracts, data, universe, features, experiments, execution)
+tests/       Contract, look-ahead, split, holdout-isolation, execution, and hygiene tests
 ```
 
 ## Troubleshooting
@@ -210,9 +255,13 @@ not regenerate. Run `make schemas` and commit the result.
 **Wrong Python version** — this project requires 3.12. `uv` reads
 `.python-version` and will fetch it; a manual venv will not.
 
-**`Alpaca keys are not set`** — you passed `--source alpaca` without paper keys.
-Use the default fixture path, or export `ALPACA_API_KEY_ID` and
-`ALPACA_API_SECRET_KEY`. Never commit `.env`.
+**`Alpaca keys are not set`** — you passed `--source alpaca` or `--broker alpaca`
+without paper keys. Use the default fixture / fake-broker path, or export
+`ALPACA_API_KEY_ID` and `ALPACA_API_SECRET_KEY`. Never commit `.env`.
+
+**`unattended session refused while risk limits are provisional`** — expected
+until `docs/00_owner_mandate.md` §3 is filled and `owner_approved: true`. Run
+without `--unattended`.
 
 ## Next
 
